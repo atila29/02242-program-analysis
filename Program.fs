@@ -95,7 +95,7 @@ let drawProgram (p: Program) =
         | DeclarationR(name) -> ""
         | DeclarationD(d, d1) ->  drawDeclaration d + drawDeclaration d1
 
-    let rec drawStatements (s: Statement) =
+    let rec drawStatement (s: Statement) =
         match s with
         | AssignmentL(l, a) -> ""
         | AssignmentR(l, l1) -> ""
@@ -152,7 +152,7 @@ let drawProgram (p: Program) =
         | OrOp -> ""
 
     match p with
-        | dec, stm -> drawDeclaration dec + drawDeclaration stm
+        | dec, stm -> drawDeclaration dec + drawStatement stm
 
 [<EntryPoint>]
 let main argv =
