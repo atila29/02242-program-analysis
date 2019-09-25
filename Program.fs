@@ -97,24 +97,24 @@ let drawProgram (p: Program) =
 
     let rec drawStatement (s: Statement) =
         match s with
-        | AssignmentL(l, a) -> ""
+        | AssignmentL(l, a) -> "[label = \"" + drawL l + " \\ := \\ " + drawA a + " ;\"];\n"
         | AssignmentR(l, l1) -> ""
-        | Statements (s, s1) -> ""
         | IfStatement(b, s) -> ""
         | WhileStatement (b, s) -> ""
         | Read(l) -> ""
         | Write (a) -> ""
+        | Statements (s, s1) -> drawStatement s + drawStatement s1
 
     and drawL (l:L) =
         match l with
-        | LabelX(x) -> ""
+        | LabelX(x) -> x
         | LabelA(name, index) -> ""
         | LabelFstR -> ""
         | LabelSndR -> ""
 
     and drawA (a:A) =
         match a with
-        | ArithmeticN(n) -> ""
+        | ArithmeticN(n) -> string n
         | ArithmeticX(x) -> ""
         | ArithmeticA (name, index) -> ""
         | ArithmeticFstR -> ""
