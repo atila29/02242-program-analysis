@@ -77,7 +77,7 @@ and Declaration =
 // digraph program_graph3 {rankdir=TL;
 // node [shape = circle]; q_s;
 // node [shape = doublecircle]; q_e;
-// node [shape = circle]
+// node [shape = circle];
 //     q_s -> q_1 [label = "int[5] \ A;"];
 //     q_1 -> q_2 [label = "int \ x;"];
 //     q_2 -> q_3 [label = "x := 4;"];
@@ -90,8 +90,8 @@ and Declaration =
 let drawProgram (p: Program) =
     let rec drawDeclaration (d: Declaration) =
         match d with
-        | DeclarationX(x) -> "[label = \"int \\" + x + " ;\"];"
-        | DeclarationA(name, index) -> ""// of string * int              // declaration of array 
+        | DeclarationX(x) -> "[label = \"int \\ " + x + " ;\"];\n"
+        | DeclarationA(name, index) -> "[label = \"" + name + " \\ [" +  string index + "] ;\"];\n" // of string * int              // declaration of array 
         | DeclarationR(name) -> ""
         | DeclarationD(d, d1) ->  drawDeclaration d + drawDeclaration d1
 
@@ -152,7 +152,11 @@ let drawProgram (p: Program) =
         | OrOp -> ""
 
     match p with
-        | dec, stm -> drawDeclaration dec + drawStatement stm
+        | dec, stm -> 
+        "digraph program_graph3 {rankdir=TL;
+node [shape = circle]; q_s;
+node [shape = doublecircle]; q_e;
+node [shape = circle];\n" + drawDeclaration dec + drawStatement stm + "}"
 
 [<EntryPoint>]
 let main argv =
@@ -175,7 +179,8 @@ let main argv =
                     )
     )
     
+    let drawing = drawProgram ast
 
-    printfn "set breakpoint"
+    printfn "%s" drawing
 
     0 // return an integer exit code
