@@ -153,10 +153,12 @@ let drawProgram (p: Program) =
 
     match p with
         | dec, stm -> 
-        "digraph program_graph3 {rankdir=TL;
-node [shape = circle]; q_s;
-node [shape = doublecircle]; q_e;
-node [shape = circle];\n" + drawDeclaration dec + drawStatement stm + "}"
+            "digraph program_graph3 {rankdir=TL;\n" +
+            "node [shape = circle]; q_s;\n" +
+            "node [shape = doublecircle]; q_e;\n" +
+            "node [shape = circle];\n" + 
+            drawDeclaration dec + drawStatement stm + 
+            "}"
 
 [<EntryPoint>]
 let main argv =
