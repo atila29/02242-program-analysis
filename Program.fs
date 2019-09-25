@@ -103,7 +103,7 @@ let drawProgram (p: Program) =
         | WhileStatement (b, s) -> ""
         | Read(l) -> ""
         | Write (a) -> ""
-        | Statements (s, s1) -> drawStatement s + drawStatement s1
+        | Statements (s, s1) -> drawStatement s + drawStatement s1 // using lists solves issue with lastnode and endnode
 
     and drawL (l:L) =
         match l with
