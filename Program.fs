@@ -63,7 +63,7 @@ and BooleanOperator =
 and Declaration =
         | DeclarationX of string                    // Declaration of variable 
         | DeclarationA of string * int              // declaration of array 
-        | DeclarationR of int * int                 // not correct
+        | DeclarationR of string                    // Declaration of record
         | DeclarationD of Declaration * Declaration 
 
 // int[5] A;
@@ -74,7 +74,85 @@ and Declaration =
 // x := A[x];
 // }
 
+// digraph program_graph3 {rankdir=TL;
+// node [shape = circle]; q_s;
+// node [shape = doublecircle]; q_e;
+// node [shape = circle]
+//     q_s -> q_1 [label = "int[5] \ A;"];
+//     q_1 -> q_2 [label = "int \ x;"];
+//     q_2 -> q_3 [label = "x := 4;"];
+//     q_3 -> q_4 [label = "A[x] := 2;"];
+//     q_4 -> q_5 [label = "A[3] == 12"];
+//     q_5 -> q_e [label = "x := A[x];"];
+//     q_4 -> q_e [label = "!(A[3] == 12)"];
+// }
 
+let drawProgram (p: Program) =
+    let rec drawDeclaration (d: Declaration) =
+        match d with
+        | DeclarationX(x) -> "[label = \"int \\" + x + " ;\"];"
+        | DeclarationA(name, index) -> ""// of string * int              // declaration of array 
+        | DeclarationR(name) -> ""
+        | DeclarationD(d, d1) ->  drawDeclaration d + drawDeclaration d1
+
+    let rec drawStatements (s: Statement) =
+        match s with
+        | AssignmentL(l, a) -> ""
+        | AssignmentR(l, l1) -> ""
+        | Statements (s, s1) -> ""
+        | IfStatement(b, s) -> ""
+        | WhileStatement (b, s) -> ""
+        | Read(l) -> ""
+        | Write (a) -> ""
+
+    and drawL (l:L) =
+        match l with
+        | LabelX(x) -> ""
+        | LabelA(name, index) -> ""
+        | LabelFstR -> ""
+        | LabelSndR -> ""
+
+    and drawA (a:A) =
+        match a with
+        | ArithmeticN(n) -> ""
+        | ArithmeticX(x) -> ""
+        | ArithmeticA (name, index) -> ""
+        | ArithmeticFstR -> ""
+        | ArithmeticSndR -> ""
+        | ROp (a, aOp, a1) -> drawA a + drawArithmeticOperator aOp + drawA a1
+
+    and drawB (b: B) =
+        match b with
+        | True -> ""
+        | False -> ""
+        | AOp(a, rOp, a1) -> drawA a + drawRelationalOperator rOp + drawA a1
+        | BOp(b, bOp, b1) -> drawB b + drawBooleanOperator bOp + drawB b1
+        | Not(b) -> "!" + drawB b
+
+
+    and drawArithmeticOperator (a: ArithmeticOperator) =
+        match a with
+        | Plus -> ""
+        | Minus -> ""
+        | Multiply -> ""
+        | Divide -> ""
+
+    and drawRelationalOperator (r: RelationalOperator) =
+        match r with
+        | LessThan -> ""
+        | GreaterThan -> ""
+        | LesserOrEqualTo -> ""
+        | GreaterOrEqualTo -> ""
+        | EqualTo -> ""
+        | NotEqualTo -> ""
+
+    and drawBooleanOperator (b: BooleanOperator) =
+        match b with
+        | AndOp -> ""
+        | OrOp -> ""
+
+    match p with
+        | dec, stm -> drawDeclaration dec + drawDeclaration stm
 
 [<EntryPoint>]
 let main argv =
