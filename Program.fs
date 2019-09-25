@@ -99,7 +99,7 @@ let drawProgram (p: Program) =
         match s with
         | AssignmentL(l, a) -> "[label = \"" + drawL l + " \\ := \\ " + drawA a + " ;\"];\n"
         | AssignmentR(l, l1) -> ""
-        | IfStatement(b, s) -> ""
+        | IfStatement(b, s) -> "" // if statements was a list you could know the endnode by the length of the list? ...except for nested lists...
         | WhileStatement (b, s) -> ""
         | Read(l) -> ""
         | Write (a) -> ""
@@ -108,23 +108,23 @@ let drawProgram (p: Program) =
     and drawL (l:L) =
         match l with
         | LabelX(x) -> x
-        | LabelA(name, index) -> ""
+        | LabelA(name, a) -> name + "[" + drawA a + "]"
         | LabelFstR -> ""
         | LabelSndR -> ""
 
     and drawA (a:A) =
         match a with
         | ArithmeticN(n) -> string n
-        | ArithmeticX(x) -> ""
-        | ArithmeticA (name, index) -> ""
+        | ArithmeticX(x) -> x
+        | ArithmeticA (name, index) -> name + "[" + string index + "]"
         | ArithmeticFstR -> ""
         | ArithmeticSndR -> ""
         | ROp (a, aOp, a1) -> drawA a + drawArithmeticOperator aOp + drawA a1
 
     and drawB (b: B) =
         match b with
-        | True -> ""
-        | False -> ""
+        | True -> "true"
+        | False -> "false"
         | AOp(a, rOp, a1) -> drawA a + drawRelationalOperator rOp + drawA a1
         | BOp(b, bOp, b1) -> drawB b + drawBooleanOperator bOp + drawB b1
         | Not(b) -> "!" + drawB b
