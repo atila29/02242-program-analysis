@@ -132,24 +132,24 @@ let drawProgram (p: Program) =
 
     and drawArithmeticOperator (a: ArithmeticOperator) =
         match a with
-        | Plus -> ""
-        | Minus -> ""
-        | Multiply -> ""
-        | Divide -> ""
+        | Plus -> "+"
+        | Minus -> "-"
+        | Multiply -> "*"
+        | Divide -> "/"
 
     and drawRelationalOperator (r: RelationalOperator) =
         match r with
-        | LessThan -> ""
-        | GreaterThan -> ""
-        | LesserOrEqualTo -> ""
-        | GreaterOrEqualTo -> ""
-        | EqualTo -> ""
-        | NotEqualTo -> ""
+        | LessThan -> "<"
+        | GreaterThan -> ">"
+        | LesserOrEqualTo -> "<="
+        | GreaterOrEqualTo -> ">="
+        | EqualTo -> "=="
+        | NotEqualTo -> "!="
 
     and drawBooleanOperator (b: BooleanOperator) =
         match b with
-        | AndOp -> ""
-        | OrOp -> ""
+        | AndOp -> "&"
+        | OrOp -> "|"
 
     match p with
         | dec, stm -> 
