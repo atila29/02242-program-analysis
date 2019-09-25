@@ -91,9 +91,9 @@ let drawProgram (p: Program) =
     let rec drawDeclaration (d: Declaration) =
         match d with
         | DeclarationX(x) -> "[label = \"int \\ " + x + " ;\"];\n"
-        | DeclarationA(name, index) -> "[label = \"" + name + " \\ [" +  string index + "] ;\"];\n" // of string * int              // declaration of array 
+        | DeclarationA(name, index) -> "[label = \"" + name + " \\ [" +  string index + "] ;\"];\n"  // declaration of array 
         | DeclarationR(name) -> ""
-        | DeclarationD(d, d1) ->  drawDeclaration d + drawDeclaration d1
+        | DeclarationD(d, d1) ->  drawDeclaration d + drawDeclaration d1 // using lists solves issue with lastnode and endnode
 
     let rec drawStatement (s: Statement) =
         match s with
