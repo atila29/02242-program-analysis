@@ -74,7 +74,12 @@ and Declaration =
 // x := A[x];
 // }
 
-let ast = Program(
+
+
+[<EntryPoint>]
+let main argv =
+    
+    let ast = Program(
                     DeclarationD(
                                     DeclarationA("A", 5), // int[5] A;
                                     DeclarationX("x") // int x;
@@ -91,11 +96,6 @@ let ast = Program(
                                 )
                     )
     )
-
-[<EntryPoint>]
-let main argv =
-    
-
     
 
     printfn "set breakpoint"
