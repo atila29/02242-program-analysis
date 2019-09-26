@@ -1,8 +1,7 @@
 ﻿// Learn more about F# at http://fsharp.org
-
-
-
 open System
+
+
 type Program = Declaration * Statement
     
 and Statement =
@@ -64,7 +63,9 @@ and Declaration =
         | DeclarationX of string                    // Declaration of variable 
         | DeclarationA of string * int              // declaration of array 
         | DeclarationR of string                    // Declaration of record
-        | DeclarationD of Declaration * Declaration 
+        | DeclarationD of Declaration * Declaration
+
+
 
 // int[5] A;
 // int x;
@@ -87,15 +88,28 @@ and Declaration =
 //     q_4 -> q_e [label = "!(A[3] == 12)"];
 // }
 
-let drawProgram (p: Program) =
-    let rec drawDeclaration (d: Declaration) =
-        match d with
-        | DeclarationX(x) -> "[label = \"int \\ " + x + " ;\"];\n"
-        | DeclarationA(name, index) -> "[label = \"" + name + " \\ [" +  string index + "] ;\"];\n"  // declaration of array 
-        | DeclarationR(name) -> ""
-        | DeclarationD(d, d1) ->  drawDeclaration d + drawDeclaration d1 // using lists solves issue with lastnode and endnode
+type ProgramGraph = Node * Node * Edge List
+and Edge = Node * String * Node
+and Node = int
 
-    let rec drawStatement (s: Statement) =
+// q-1 (end) q0 (start) -> q1 -> q2 -> q3
+
+let convertToProgramGraph qstart qend (p: Program) =
+    let rec convertDeclaration ((qs, d): (int * Declaration)) =
+        match d with
+        | DeclarationX(x) -> ([Edge(qs, "int " + x + ";", qs+1)], qs+1) 
+        | DeclarationA(name, index) -> ([Edge(qs, "int[" + string index + "] " + name + ";", qs+1)], qs+1)
+        | DeclarationR(name) -> ([Edge(qs, "{int fst; int snd} " + name + ";", qs+1)], qs+1)
+        | DeclarationD(d1, d2) -> 
+            match convertDeclaration (qs, d1) with 
+            | (lst, cnt) -> match convertDeclaration (cnt, d2) with
+                            | lst2, cnt2 -> (lst @ lst2, cnt2)
+
+
+
+        // using lists solves issue with lastnode and endnode (lst * int)
+
+    let rec convertStatements ((qs, s): (int *Statement)) =
         match s with
         | AssignmentL(l, a) -> "[label = \"" + drawL l + " \\ := \\ " + drawA a + " ;\"];\n"
         | AssignmentR(l, l1) -> ""
@@ -103,7 +117,7 @@ let drawProgram (p: Program) =
         | WhileStatement (b, s) -> ""
         | Read(l) -> ""
         | Write (a) -> ""
-        | Statements (s, s1) -> drawStatement s + drawStatement s1 // using lists solves issue with lastnode and endnode
+        // | Statements (s1, s2) -> convertStatements s + convertStatements s1 // using lists solves issue with lastnode and endnode
 
     and drawL (l:L) =
         match l with
@@ -152,13 +166,82 @@ let drawProgram (p: Program) =
         | OrOp -> "|"
 
     match p with
-        | dec, stm -> 
-            "digraph program_graph3 {rankdir=TL;\n" +
-            "node [shape = circle]; q_s;\n" +
-            "node [shape = doublecircle]; q_e;\n" +
-            "node [shape = circle];\n" + 
-            drawDeclaration dec + drawStatement stm + 
-            "}"
+        | dec, stm -> match convertDeclaration (0, dec) with
+                        | (edges1, cnt) -> match convertStatements cnt stm with
+                                           | (edges2, _) -> (edges1 @ edges2)
+
+// let drawProgram (p: Program) =
+//     let rec drawDeclaration (d: Declaration) =
+//         match d with
+//         | DeclarationX(x) -> "[label = \"int \\ " + x + " ;\"];\n"
+//         | DeclarationA(name, index) -> "[label = \"" + name + " \\ [" +  string index + "] ;\"];\n"  // declaration of array 
+//         | DeclarationR(name) -> ""
+//         | DeclarationD(d, d1) ->  drawDeclaration d + drawDeclaration d1 // using lists solves issue with lastnode and endnode
+
+//     let rec drawStatement (s: Statement) =
+//         match s with
+//         | AssignmentL(l, a) -> "[label = \"" + drawL l + " \\ := \\ " + drawA a + " ;\"];\n"
+//         | AssignmentR(l, l1) -> ""
+//         | IfStatement(b, s) -> "" // if statements was a list you could know the endnode by the length of the list? ...except for nested lists...
+//         | WhileStatement (b, s) -> ""
+//         | Read(l) -> ""
+//         | Write (a) -> ""
+//         | Statements (s, s1) -> drawStatement s + drawStatement s1 // using lists solves issue with lastnode and endnode
+
+//     and drawL (l:L) =
+//         match l with
+//         | LabelX(x) -> x
+//         | LabelA(name, a) -> name + "[" + drawA a + "]"
+//         | LabelFstR -> ""
+//         | LabelSndR -> ""
+
+//     and drawA (a:A) =
+//         match a with
+//         | ArithmeticN(n) -> string n
+//         | ArithmeticX(x) -> x
+//         | ArithmeticA (name, index) -> name + "[" + string index + "]"
+//         | ArithmeticFstR -> ""
+//         | ArithmeticSndR -> ""
+//         | ROp (a, aOp, a1) -> drawA a + drawArithmeticOperator aOp + drawA a1
+
+//     and drawB (b: B) =
+//         match b with
+//         | True -> "true"
+//         | False -> "false"
+//         | AOp(a, rOp, a1) -> drawA a + drawRelationalOperator rOp + drawA a1
+//         | BOp(b, bOp, b1) -> drawB b + drawBooleanOperator bOp + drawB b1
+//         | Not(b) -> "!" + drawB b
+
+
+//     and drawArithmeticOperator (a: ArithmeticOperator) =
+//         match a with
+//         | Plus -> "+"
+//         | Minus -> "-"
+//         | Multiply -> "*"
+//         | Divide -> "/"
+
+//     and drawRelationalOperator (r: RelationalOperator) =
+//         match r with
+//         | LessThan -> "<"
+//         | GreaterThan -> ">"
+//         | LesserOrEqualTo -> "<="
+//         | GreaterOrEqualTo -> ">="
+//         | EqualTo -> "=="
+//         | NotEqualTo -> "!="
+
+//     and drawBooleanOperator (b: BooleanOperator) =
+//         match b with
+//         | AndOp -> "&"
+//         | OrOp -> "|"
+
+//     match p with
+//         | dec, stm -> 
+//             "digraph program_graph3 {rankdir=TL;\n" +
+//             "node [shape = circle]; q_s;\n" +
+//             "node [shape = doublecircle]; q_e;\n" +
+//             "node [shape = circle];\n" + 
+//             drawDeclaration dec + drawStatement stm + 
+//             "}"
 
 [<EntryPoint>]
 let main argv =
@@ -181,8 +264,8 @@ let main argv =
                     )
     )
     
-    let drawing = drawProgram ast
+    let graph = convertToProgramGraph 0 -1 ast
 
-    printfn "%s" drawing
+    printfn "set breakpoint"
 
     0 // return an integer exit code
