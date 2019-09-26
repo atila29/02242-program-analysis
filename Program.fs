@@ -6,9 +6,9 @@ type Program = Declaration * Statement
     
 and Statement =
     | AssignmentL of L * A
-    | AssignmentR of L * L // represent the R ref?
+    | AssignmentR of String * A * A //L * L // represent the R ref?
     | Statements of Statement * Statement
-    | IfStatement of B * Statement
+    | IfStatement of B * Statement // Todo: Need an If-Else statement
     | WhileStatement of B * Statement
     | Read of L
     | Write of A
@@ -21,14 +21,14 @@ and Expression =
 and L = // by reference?
     | LabelX of String
     | LabelA of String * A
-    | LabelFstR
-    | LabelSndR
+    | LabelFstR of String
+    | LabelSndR of String
 and A = // or by value?
     | ArithmeticN of int
     | ArithmeticX of string
     | ArithmeticA of string * int
-    | ArithmeticFstR
-    | ArithmeticSndR
+    | ArithmeticFstR of string
+    | ArithmeticSndR of string
     | ROp of A * ArithmeticOperator * A
 and B =
     | True
@@ -103,55 +103,55 @@ let convertToProgramGraph qstart qend (p: Program) =
         | DeclarationD(d1, d2) -> 
             match convertDeclaration (qs, d1) with 
             | (lst, cnt) -> match convertDeclaration (cnt, d2) with
-                            | lst2, cnt2 -> (lst @ lst2, cnt2)
+                            | (lst2, cnt2) -> (lst @ lst2, cnt2)
 
 
-
-        // using lists solves issue with lastnode and endnode (lst * int)
-
-    let rec convertStatements ((qs, s): (int *Statement)) =
+    let rec convertStatements ((qs, s): (int * Statement)) =
         match s with
-        | AssignmentL(l, a) -> "[label = \"" + drawL l + " \\ := \\ " + drawA a + " ;\"];\n"
-        | AssignmentR(l, l1) -> ""
-        | IfStatement(b, s) -> "" // if statements was a list you could know the endnode by the length of the list? ...except for nested lists...
-        | WhileStatement (b, s) -> ""
-        | Read(l) -> ""
-        | Write (a) -> ""
-        // | Statements (s1, s2) -> convertStatements s + convertStatements s1 // using lists solves issue with lastnode and endnode
+        | AssignmentL(l, a) -> ([Edge(qs, convertL l + ":=" + convertA a, qs + 1)], qs + 1) 
+        | AssignmentR(n, a1, a2) -> ([Edge(qs, "", qs + 1)], qs + 1)
+        | IfStatement(b, s) -> ([], qs + 1)
+        | WhileStatement (b, s) -> ([], qs + 1)
+        | Read(l) -> ([], qs + 1)
+        | Write (a) -> ([], qs + 1)
+        | Statements (s1, s2) -> 
+            match convertStatements (qs, s1) with
+              | (lst, cnt) -> match convertStatements (cnt, s2) with
+                                | (lst2, cnt2) -> (lst @ lst2, cnt2)
 
-    and drawL (l:L) =
+    // Lots of label conversions...
+    and convertL (l:L) =
         match l with
         | LabelX(x) -> x
-        | LabelA(name, a) -> name + "[" + drawA a + "]"
-        | LabelFstR -> ""
-        | LabelSndR -> ""
+        | LabelA(n, a) -> n + "[" + convertA a + "]"
+        | LabelFstR(n) -> n + ".fst"
+        | LabelSndR(n) -> n + ".snd"
 
-    and drawA (a:A) =
+    and convertA (a:A) =
         match a with
         | ArithmeticN(n) -> string n
         | ArithmeticX(x) -> x
-        | ArithmeticA (name, index) -> name + "[" + string index + "]"
-        | ArithmeticFstR -> ""
-        | ArithmeticSndR -> ""
-        | ROp (a, aOp, a1) -> drawA a + drawArithmeticOperator aOp + drawA a1
+        | ArithmeticA (n, i) -> n + "[" + string i + "]"
+        | ArithmeticFstR(n) -> n + ".fst"
+        | ArithmeticSndR(n) -> n + ".snd"
+        | ROp (a1, aOp, a2) -> convertA a1 + convertArithOp aOp + convertA a2
 
-    and drawB (b: B) =
+    and convertB (b: B) =
         match b with
         | True -> "true"
         | False -> "false"
-        | AOp(a, rOp, a1) -> drawA a + drawRelationalOperator rOp + drawA a1
-        | BOp(b, bOp, b1) -> drawB b + drawBooleanOperator bOp + drawB b1
-        | Not(b) -> "!" + drawB b
+        | AOp(a1, rOp, a2) -> convertA a1 + convertRelOp rOp + convertA a2
+        | BOp(b1, bOp, b2) -> convertB b1 + convertBoolOp bOp + convertB b2
+        | Not(b) -> "!" + convertB b
 
-
-    and drawArithmeticOperator (a: ArithmeticOperator) =
+    and convertArithOp (a: ArithmeticOperator) =
         match a with
         | Plus -> "+"
         | Minus -> "-"
         | Multiply -> "*"
         | Divide -> "/"
 
-    and drawRelationalOperator (r: RelationalOperator) =
+    and convertRelOp (r: RelationalOperator) =
         match r with
         | LessThan -> "<"
         | GreaterThan -> ">"
@@ -160,14 +160,14 @@ let convertToProgramGraph qstart qend (p: Program) =
         | EqualTo -> "=="
         | NotEqualTo -> "!="
 
-    and drawBooleanOperator (b: BooleanOperator) =
+    and convertBoolOp (b: BooleanOperator) =
         match b with
         | AndOp -> "&"
         | OrOp -> "|"
 
     match p with
         | dec, stm -> match convertDeclaration (0, dec) with
-                        | (edges1, cnt) -> match convertStatements cnt stm with
+                        | (edges1, cnt) -> match convertStatements (cnt, stm) with
                                            | (edges2, _) -> (edges1 @ edges2)
 
 // let drawProgram (p: Program) =
