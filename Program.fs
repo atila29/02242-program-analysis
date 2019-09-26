@@ -6,7 +6,7 @@ type Program = Declaration * Statement
     
 and Statement =
     | AssignmentL of L * A
-    | AssignmentR of String * A * A //L * L // represent the R ref?
+    | AssignmentR of String * A * A
     | Statements of Statement * Statement
     | IfStatement of B * Statement // Todo: Need an If-Else statement
     | WhileStatement of B * Statement
@@ -16,14 +16,14 @@ and Statement =
 and Expression =
     | ExpL of L
     | ExpA of A
-    | ExpB of B               
+    | ExpB of B
 
-and L = // by reference?
+and L =
     | LabelX of String
     | LabelA of String * A
     | LabelFstR of String
     | LabelSndR of String
-and A = // or by value?
+and A =
     | ArithmeticN of int
     | ArithmeticX of string
     | ArithmeticA of string * int
@@ -53,10 +53,10 @@ and RelationalOperator =
         | LesserOrEqualTo
         | GreaterOrEqualTo
         | EqualTo
-        | NotEqualTo    
+        | NotEqualTo
 and BooleanOperator =
         | AndOp
-        | OrOp            
+        | OrOp
 
 
 and Declaration =
@@ -109,11 +109,11 @@ let convertToProgramGraph qstart qend (p: Program) =
     let rec convertStatements ((qs, s): (int * Statement)) =
         match s with
         | AssignmentL(l, a) -> ([Edge(qs, convertL l + ":=" + convertA a, qs + 1)], qs + 1) 
-        | AssignmentR(n, a1, a2) -> ([Edge(qs, "", qs + 1)], qs + 1)
-        | IfStatement(b, s) -> ([], qs + 1)
-        | WhileStatement (b, s) -> ([], qs + 1)
-        | Read(l) -> ([], qs + 1)
-        | Write (a) -> ([], qs + 1)
+        | AssignmentR(n, a1, a2) -> ([Edge(qs, "", qs + 1)], qs + 1) // Todo
+        | IfStatement(b, s) -> ([], qs + 1) // Todo
+        | WhileStatement (b, s) -> ([], qs + 1) // Todo
+        | Read(l) -> ([], qs + 1) // Todo
+        | Write (a) -> ([], qs + 1) // Todo
         | Statements (s1, s2) -> 
             match convertStatements (qs, s1) with
               | (lst, cnt) -> match convertStatements (cnt, s2) with
@@ -266,6 +266,7 @@ let main argv =
     
     let graph = convertToProgramGraph 0 -1 ast
 
-    printfn "set breakpoint"
+    printfn "set breakpoint to see ast value"
 
-    0 // return an integer exit code
+    // Exit code
+    0
