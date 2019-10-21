@@ -4,7 +4,7 @@
     <TargetFramework>netcoreapp2.2</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="AST.fs" />
+    <Compile Include="AbstractSyntaxTree.fs" />
     <PackageReference Include="FsLexYacc" Version="9.0.2" />
     <FsYacc Include="Parser.fsy">
       <OtherFlags>--module Parser</OtherFlags>

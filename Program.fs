@@ -1,5 +1,6 @@
 ﻿// Learn more about F# at http://fsharp.org
 open System
+open AbstractSyntaxTree
 open FSharp.Text.Lexing
 
 
@@ -95,7 +96,7 @@ and Node = int
 
 // q-1 (end) q0 (start) -> q1 -> q2 -> q3
 
-let convertToProgramGraph qstart qend (p: Program) =
+let convertToProgramGraph (p: Program) =
     let rec convertDeclaration ((qs, d): (int * Declaration)) =
         match d with
         | DeclarationX(x) -> ([Edge(qs, "int " + x + ";", qs+1)], qs+1) 
@@ -110,12 +111,15 @@ let convertToProgramGraph qstart qend (p: Program) =
     let rec convertStatements ((qs, s): (int * Statement)) =
         match s with
         | AssignmentL(l, a) -> ([Edge(qs, convertL l + ":=" + convertA a, qs + 1)], qs + 1) 
-        | AssignmentR(n, a1, a2) -> ([Edge(qs, "", qs + 1)], qs + 1) // Todo
+        | AssignmentR(n, a1, a2) -> ([Edge(qs, n + ":=(" + convertA a1 + "," + convertA a2, qs + 1)], qs + 1)
         | IfStatement(b, s) -> match convertStatements (qs+1, s) with
-                                | (edges, n) -> (edges@ [Edge(qs, "!" + convertB b, n+1); Edge(qs, convertB b, qs + 1)], n+1) // Todo
-        | WhileStatement (b, s) -> ([], qs + 1) // Todo
-        | Read(l) -> ([], qs + 1) // Todo
-        | Write (a) -> ([], qs + 1) // Todo
+                                | (edges, n) -> (edges@ [Edge(qs, "!" + convertB b, n); Edge(qs, convertB b, qs + 1)], n+1)
+        //| IfElseStatement(b, s1, s2) -> match convertStatements (qs+1, s1) with
+        //    | (edges1, n) -> match convertStatements (n+1, s2)
+        | WhileStatement (b, s) -> match convertStatements (qs+1, s) with
+                                    | (edges, n) -> (edges @ [Edge(qs, "!" + convertB b, n); Edge(qs, convertB b, qs + 1)], n+1)
+        | Read(l) -> ([Edge(qs, "read " + convertL l, qs+1)], qs + 1)
+        | Write (a) -> ([Edge(qs, "write" + convertA a, qs+1)], qs + 1)
         | Statements (s1, s2) -> 
             match convertStatements (qs, s1) with
               | (lst, cnt) -> match convertStatements (cnt, s2) with
@@ -261,12 +265,10 @@ let main argv =
                                                         AOp(ArithmeticA("A", 3), EqualTo, ArithmeticN(12)), // if (A[3] == 12) { alternative -> BOp(ArithmeticA("A", ArithmeticN(3)), EqualTo(), N(12))
                                                         AssignmentL(LabelX("x"), ArithmeticA("A", 4)) // x := A[x]; // is this by value or reference? (should be documented).
                                             )
-        
                                 )
                     )
     )
     
-    let graph = convertToProgramGraph 0 -1 ast
     
     
     let x = "   
@@ -277,6 +279,7 @@ let main argv =
     WHERE x = 50 AND y = 20   
     ORDER BY x ASC, y DESC, z   
 "
+    let graph = convertToProgramGraph ast
 
     let lexbuf = LexBuffer<char>.FromString x
     //let y = SqlParser.start SqlLexer.tokenize lexbuf   
