@@ -1,5 +1,6 @@
 ﻿// Learn more about F# at http://fsharp.org
 open System
+open FSharp.Text.Lexing
 
 
 type Program = Declaration * Statement
@@ -266,6 +267,20 @@ let main argv =
     )
     
     let graph = convertToProgramGraph 0 -1 ast
+    
+    
+    let x = "   
+    SELECT x, y, z   
+    FROM t1   
+    LEFT JOIN t2   
+    INNER JOIN t3 ON t3.ID = t2.ID   
+    WHERE x = 50 AND y = 20   
+    ORDER BY x ASC, y DESC, z   
+"
+
+    let lexbuf = LexBuffer<char>.FromString x
+    //let y = SqlParser.start SqlLexer.tokenize lexbuf   
+    printfn "%A" lexbuf  
 
     printfn "set breakpoint to see ast value"
 
