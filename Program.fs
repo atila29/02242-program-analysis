@@ -110,7 +110,8 @@ let convertToProgramGraph qstart qend (p: Program) =
         match s with
         | AssignmentL(l, a) -> ([Edge(qs, convertL l + ":=" + convertA a, qs + 1)], qs + 1) 
         | AssignmentR(n, a1, a2) -> ([Edge(qs, "", qs + 1)], qs + 1) // Todo
-        | IfStatement(b, s) -> ([], qs + 1) // Todo
+        | IfStatement(b, s) -> match convertStatements (qs+1, s) with
+                                | (edges, n) -> (edges@ [Edge(qs, "!" + convertB b, n+1); Edge(qs, convertB b, qs + 1)], n+1) // Todo
         | WhileStatement (b, s) -> ([], qs + 1) // Todo
         | Read(l) -> ([], qs + 1) // Todo
         | Write (a) -> ([], qs + 1) // Todo
