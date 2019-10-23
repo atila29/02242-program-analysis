@@ -1,3 +1,21 @@
+{
+open System
+open Parser
+open Microsoft.FSharp.Text.Lexing
+
+let keyword s = 
+    match s with
+    | "bool"      -> BTYP
+    | "int"       -> ITYP
+    | "read"      -> READ
+    | "write"     -> WRITE
+    | "if"        -> IF
+    | "while"     -> WHILE
+    | "true"      -> BOOL(true) 
+    | "false"     -> BOOL(false)
+    | _           -> NAME s
+}
+
 let digit = ['0'-'9']
 let whitespace = [' ' '\t' ]
 let newline = ('\n' | '\r' '\n')
@@ -7,19 +25,31 @@ rule token = parse
 | whitespace     { token lexbuf }
 | newline        { newline lexbuf; token lexbuf }
 | "while"        { WHILE }
-| "begin"        { BEGIN }
-| "end"          { END }
-| "do"           { DO }
 | "if"           { IF }
-| "then"         { THEN }
 | "else"         { ELSE }
-| "print"        { PRINT }
-| "decr"         { DECR }
+| "read"         { READ }
+| "write"        { WRITE }
 | "("            { LPAREN }
 | ")"            { RPAREN }
+| "["            { LSP }
+| "]"            { RSP }
+| "{"            { LCP }
+| "}"            { RCP }
+| ","            { COMMA }
 | ";"            { SEMI }
 | ":="           { ASSIGN }
+| "!"            { NEG }
+| "||"           { OR }
+| "&&"           { AND }
+| "!="           { NEQ }
+| "<"            { LT }
+| ">"            { GT }
+| "<="           { LE }
+| ">="           { GE }
+| "*"            { TIMES }
+| "-"            { MINUS }
+| "=="            { EQ }
+| "+"            { PLUS }
 | ['a'-'z']+     { ID(lexeme lexbuf) }
 | ['-']?digit+   { INT (Int32.Parse(lexeme lexbuf)) }
-| ['-']?digit+('.'digit+)?(['e''E']digit+)?   { FLOAT (Double.Parse(lexeme lexbuf)) }
 | eof            { EOF }

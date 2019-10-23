@@ -1,7 +1,6 @@
 ﻿// Learn more about F# at http://fsharp.org
 open System
-open AbstractSyntaxTree
-open FSharp.Text.Lexing
+open ParsingUtil
 
 
 type Program = Declaration * Statement
@@ -269,21 +268,22 @@ let main argv =
                     )
     )
     
+
     
-    
-    let x = "   
-    SELECT x, y, z   
-    FROM t1   
-    LEFT JOIN t2   
-    INNER JOIN t3 ON t3.ID = t2.ID   
-    WHERE x = 50 AND y = 20   
-    ORDER BY x ASC, y DESC, z   
+    let x ="{int[5] A;
+int x;
+x := 4;
+A[x] := 2;
+if (A[3] == 12) {
+    x := A[x];
+}
+}
 "
     let graph = convertToProgramGraph ast
 
-    let lexbuf = LexBuffer<char>.FromString x
+    let tokens = parseString x
     //let y = SqlParser.start SqlLexer.tokenize lexbuf   
-    printfn "%A" lexbuf  
+    printfn "%A" tokens  
 
     printfn "set breakpoint to see ast value"
 

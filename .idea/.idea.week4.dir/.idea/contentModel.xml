@@ -6,7 +6,9 @@
     <e p="$PROJECT_DIR$" t="IncludeRecursive">
       <e p="AbstractSyntaxTree.fs" t="Include" />
       <e p="Lexer.fsl" t="Include" />
+      <e p="Parser.fs" t="Include" />
       <e p="Parser.fsy" t="Include" />
+      <e p="ParsingUtil.fs" t="Include" />
       <e p="Program.fs" t="Include" />
       <e p="bin" t="ExcludeRecursive" />
       <e p="obj" t="ExcludeRecursive" />
