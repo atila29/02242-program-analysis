@@ -36,32 +36,18 @@ Prog:
 
 
 Stm:
-  AssignmentL of L * A
-| AssignmentR of String * A * A
-| Statements of Statement * Statement
-| IfStatement of B * Statement
-| IfElseStatement of B * Statement * Statement
-| WhileStatement of B * Statement
-| Read of L
-| Write of A
+  L ASSIGN A                          { AssignmentL($1, $3) }
+| Stm SEMI Stm                        { Statements($1, $3) }
+| IF LP B RP LCP Stm RCP ELSE LCP Stm RCP { IfElseStatement($3, $6, $10) }
+| IF LP B RP LCP Stm RCP              { IfStatement($3, $6) }
+| WHILE LP B RP LCP Stm RCP           { WhileStatement($3, $6) }
+| READ L                              { $2 }
+| WRITE A                             { $2 }
 
 Dec:
     ITYP NAME                         { DeclarationX($2) }            // int x;
   | ITYP LSP INT RSP NAME             { DeclarationA($3, $5) }        // int[5] x;
   | Dec SEMI Dec                      { DeclarationD($1, $3) }
-
-// Stm:
-//     WRITE Exp                         { PrintLn $2 }
-//   | NAME LP ExpL RP                   { Call($1, $3) }
-//   | Access ASG Exp                    { Ass($1,$3)  }
-//   | SKIP                              { Do (GC []) }
-//   | ABORT                             { Alt (GC []) } 
-//   | LCP StmL RCP                      { Block([], $2) }
-//   | LCP DecL SEMI StmL RCP            { Block($2, $4) }
-//   | IF GuardedCommand FI              { Alt $2 }
-//   | DO GuardedCommand OD              { Do $2  }
-//   | RETURN Exp                        { Return(Some $2) }
-//   | RETURN                            { Return None }
 
 L:
     NAME                             { LabelX($1) }

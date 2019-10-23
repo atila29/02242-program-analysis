@@ -13,6 +13,7 @@ let keyword s =
     | "while"     -> WHILE
     | "true"      -> BOOL(true) 
     | "false"     -> BOOL(false)
+    | "else"      -> ELSE
     | _           -> NAME s
 }
 
@@ -24,13 +25,8 @@ let newline = ('\n' | '\r' '\n')
 rule token = parse
 | whitespace     { token lexbuf }
 | newline        { newline lexbuf; token lexbuf }
-| "while"        { WHILE }
-| "if"           { IF }
-| "else"         { ELSE }
-| "read"         { READ }
-| "write"        { WRITE }
-| "("            { LPAREN }
-| ")"            { RPAREN }
+| "("            { LP }
+| ")"            { RP }
 | "["            { LSP }
 | "]"            { RSP }
 | "{"            { LCP }
@@ -48,7 +44,7 @@ rule token = parse
 | ">="           { GE }
 | "*"            { TIMES }
 | "-"            { MINUS }
-| "=="            { EQ }
+| "=="           { EQ }
 | "+"            { PLUS }
 | ['a'-'z']+     { ID(lexeme lexbuf) }
 | ['-']?digit+   { INT (Int32.Parse(lexeme lexbuf)) }
