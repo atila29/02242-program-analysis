@@ -8,10 +8,12 @@ open AbstractSyntaxTree
 %token <string> NAME
 %token ITYP BTYP
 %token LP LCP LSP RP RCP RSP
+%token ELSE
 %token IF 
 %token COMMA COLON SEMI BAR TO
 %token NEG PLUS MINUS TIMES AND EQ LE LT GT GE NEQ
 %token READ WRITE
+%token ASSIGN
 %token EOF
 
 
@@ -20,13 +22,26 @@ open AbstractSyntaxTree
 %left EQ LE GE LT GT NEQ
 %left PLUS MINUS 
 %left TIMES
+%left ASSIGN
 
 
-%start Main Prog 
-%type <Stm> Stm
-%type <Dec> Dec
+%start Main Prog
+%type<L> L
+%type<A> A
+%type<B> B
+%type<RelationalOperator> RelationalOperator
+%type<BooleanOperator> BooleanOperator
+%type<ArithmeticOperator> ArithmeticOperator
+%type <Statement> Stm
+%type <Declaration> Dec
 %type <Program> Main Prog
 %%
+
+
+
+
+
+
 
 Main:
    Prog EOF                            { $1 }

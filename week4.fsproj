@@ -5,17 +5,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AbstractSyntaxTree.fs" />
-    <PackageReference Include="FsLexYacc" Version="9.0.2" />
-    <FsYacc Include="Parser.fsy">
-      <OtherFlags>--module Parser</OtherFlags>
-    </FsYacc>
-    <FsLex Include="Lexer.fsl">
-      <OtherFlags>--module Lexer --unicode</OtherFlags>
-    </FsLex>
     <None Include="Parser.fsy" />
     <None Include="Lexer.fsl" />
     <Compile Include="Parser.fs" />
+    <Compile Include="Lexer.fs" />
     <Compile Include="ParsingUtil.fs" />
     <Compile Include="Program.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FsLexYacc" Version="9.0.2" />
   </ItemGroup>
 </Project>
