@@ -1,7 +1,7 @@
 {
 open System
+open System.Text
 open Parser
-open Microsoft.FSharp.Text.Lexing
 
 let keyword s = 
     match s with
@@ -24,7 +24,7 @@ let newline = ('\n' | '\r' '\n')
 
 rule token = parse
 | whitespace     { token lexbuf }
-| newline        { newline lexbuf; token lexbuf }
+| newline        { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
 | "("            { LP }
 | ")"            { RP }
 | "["            { LSP }
@@ -46,6 +46,7 @@ rule token = parse
 | "-"            { MINUS }
 | "=="           { EQ }
 | "+"            { PLUS }
-| ['a'-'z']+     { ID(lexeme lexbuf) }
-| ['-']?digit+   { INT (Int32.Parse(lexeme lexbuf)) }
+| "/"            { FORWARDSLASH }
+| ['a'-'z']+     { keyword(System.String lexbuf.Lexeme) }
+| ['-']?digit+   { INT (Int32.Parse(System.String lexbuf.Lexeme)) }
 | eof            { EOF }

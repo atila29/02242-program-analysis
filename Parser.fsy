@@ -9,15 +9,14 @@ open AbstractSyntaxTree
 %token ITYP BTYP
 %token LP LCP LSP RP RCP RSP
 %token ELSE
-%token IF 
+%token IF WHILE
 %token COMMA COLON SEMI BAR TO
-%token NEG PLUS MINUS TIMES AND EQ LE LT GT GE NEQ
+%token NEG PLUS MINUS TIMES FORWARDSLASH AND OR EQ LE LT GT GE NEQ
 %token READ WRITE
 %token ASSIGN
 %token EOF
 
-
-%left AND
+%left AND OR
 %nonassoc NEG
 %left EQ LE GE LT GT NEQ
 %left PLUS MINUS 
@@ -26,12 +25,12 @@ open AbstractSyntaxTree
 
 
 %start Main Prog
-%type<L> L
-%type<A> A
-%type<B> B
-%type<RelationalOperator> RelationalOperator
-%type<BooleanOperator> BooleanOperator
-%type<ArithmeticOperator> ArithmeticOperator
+%type <L> L
+%type <A> A
+%type <B> B
+%type <RelationalOperator> RelationalOperator
+%type <BooleanOperator> BooleanOperator
+%type <ArithmeticOperator> ArithmeticOperator
 %type <Statement> Stm
 %type <Declaration> Dec
 %type <Program> Main Prog
@@ -47,21 +46,21 @@ Main:
    Prog EOF                            { $1 }
 
 Prog:
-    LCP Dec SEMI Stm RCP               { P($2, $4) }
+    LCP Dec SEMI Stm RCP               { Program($2, $4) }
 
 
 Stm:
-  L ASSIGN A                          { AssignmentL($1, $3) }
-| Stm SEMI Stm                        { Statements($1, $3) }
-| IF LP B RP LCP Stm RCP ELSE LCP Stm RCP { IfElseStatement($3, $6, $10) }
-| IF LP B RP LCP Stm RCP              { IfStatement($3, $6) }
-| WHILE LP B RP LCP Stm RCP           { WhileStatement($3, $6) }
-| READ L                              { $2 }
-| WRITE A                             { $2 }
+    L ASSIGN A                          { AssignmentL($1, $3) }
+  | Stm SEMI Stm                        { Statements($1, $3) }
+  | IF LP B RP LCP Stm RCP ELSE LCP Stm RCP { IfElseStatement($3, $6, $10) }
+  | IF LP B RP LCP Stm RCP              { IfStatement($3, $6) }
+  | WHILE LP B RP LCP Stm RCP           { WhileStatement($3, $6) }
+  | READ L                              { Read($2) }
+  | WRITE A                             { Write($2) }
 
 Dec:
     ITYP NAME                         { DeclarationX($2) }            // int x;
-  | ITYP LSP INT RSP NAME             { DeclarationA($3, $5) }        // int[5] x;
+  | ITYP LSP INT RSP NAME             { DeclarationA($5, $3) }        // int[5] x;
   | Dec SEMI Dec                      { DeclarationD($1, $3) }
 
 L:
@@ -75,10 +74,10 @@ A:
   | A ArithmeticOperator A           { ROp($1, $2, $3) }
 
 B:
-  BOOL                               { BoolValue $1 }
-| A RelationalOperator A             { AOp($1, $2, $3) }
-| B BooleanOperator B                { BOp($1, $2, $3) }
-| NEG B                              { Not $1 }
+    BOOL                               { BoolValue $1 }
+  | A RelationalOperator A             { AOp($1, $2, $3) }
+  | B BooleanOperator B                { BOp($1, $2, $3) }
+  | NEG B                              { Not $2 }
 
 RelationalOperator:
     LT                               { LessThan }
@@ -95,10 +94,10 @@ BooleanOperator:
 
 
 ArithmeticOperator:
-    Plus                             { Plus }
-  | Minus                            { Minus }
-  | Multiply                         { Multiply }
-  | Divide                           { Divide }
+    PLUS                             { Plus }
+  | MINUS                            { Minus }
+  | TIMES                            { Multiply }
+  | FORWARDSLASH                     { Divide }
 
 
 
