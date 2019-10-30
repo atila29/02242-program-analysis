@@ -189,34 +189,36 @@ let convertToProgramGraph (p: Program) =
 [<EntryPoint>]
 let main argv =
     
-    let ast = Program(
-                    DeclarationD(
-                                    DeclarationA("A", 5), // int[5] A;
-                                    DeclarationX("x") // int x;
-                    ), 
-                    Statements(
-                                AssignmentL(LabelX("x"), ArithmeticN(4)), // x := 4;
-                                Statements(
-                                            AssignmentL(LabelA("A", ArithmeticX("x")), ArithmeticN(2)), // A[x] := 2;  alternative -> AssignmentL(LabelA("A", ArithmeticX(LabelX("x"))), ArithmeticN(2))
-                                            IfStatement(
-                                                        AOp(ArithmeticA("A", 3), EqualTo, ArithmeticN(12)), // if (A[3] == 12) { alternative -> BOp(ArithmeticA("A", ArithmeticN(3)), EqualTo(), N(12))
-                                                        AssignmentL(LabelX("x"), ArithmeticA("A", 4)) // x := A[x]; // is this by value or reference? (should be documented).
-                                            )
-                                )
-                    )
-    )
+//    let ast = Program(
+//                    DeclarationD(
+//                                    DeclarationA("A", 5), // int[5] A;
+//                                    DeclarationX("x") // int x;
+//                    ), 
+//                    Statements(
+//                                AssignmentL(LabelX("x"), ArithmeticN(4)), // x := 4;
+//                                Statements(
+//                                            AssignmentL(LabelA("A", ArithmeticX("x")), ArithmeticN(2)), // A[x] := 2;  alternative -> AssignmentL(LabelA("A", ArithmeticX(LabelX("x"))), ArithmeticN(2))
+//                                            IfStatement(
+//                                                        AOp(ArithmeticA("A", 3), EqualTo, ArithmeticN(12)), // if (A[3] == 12) { alternative -> BOp(ArithmeticA("A", ArithmeticN(3)), EqualTo(), N(12))
+//                                                        AssignmentL(LabelX("x"), ArithmeticA("A", 4)) // x := A[x]; // is this by value or reference? (should be documented).
+//                                            )
+//                                )
+//                    )
+//    )
     
 
     
-    let x ="{int[5] A;
-int x;
-x := 4;
-A[x] := 2;
-if (A[3] == 12) {
-    x := A[x];
-}
-}
-"
+    let x ="
+    {
+        int[5] A;
+        int x;
+        
+        x := 4;
+        A[x] := 2;
+        if (A[3] == 12) {
+            x := A[x];
+        }
+    }"
     // let graph = convertToProgramGraph ast
 
     let tokens = parseString x

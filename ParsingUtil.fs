@@ -2,13 +2,14 @@ module ParsingUtil
 
 open System.IO
 open FSharp.Text.Lexing
+open Parser
 open Lexer
 
 
 let parseString (text:string) =
   let lexbuf = LexBuffer<_>.FromString text
   try
-       Lexer.token lexbuf
+       Main token lexbuf
   with e ->
        let pos = lexbuf.EndPos
        printfn "Error near line %d, character %d\n" pos.Line pos.Column
