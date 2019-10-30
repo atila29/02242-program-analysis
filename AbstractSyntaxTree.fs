@@ -13,7 +13,7 @@ and Statement =
 | Read of L
 | Write of A
 
-and Expression =
+and Expression = // shouldn't these be used in statements?
 | ExpL of L
 | ExpA of A
 | ExpB of B
@@ -31,8 +31,7 @@ and A =
 | ArithmeticSndR of string
 | ROp of A * ArithmeticOperator * A
 and B =
-| True
-| False
+| BoolValue of bool
 | AOp of A * RelationalOperator * A
 | BOp of B * BooleanOperator * B
 | Not of B

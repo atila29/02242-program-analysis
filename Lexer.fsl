@@ -1,0 +1,52 @@
+{
+open System
+open System.Text
+open Parser
+
+let keyword s = 
+    match s with
+    | "bool"      -> BTYP
+    | "int"       -> ITYP
+    | "read"      -> READ
+    | "write"     -> WRITE
+    | "if"        -> IF
+    | "while"     -> WHILE
+    | "true"      -> BOOL(true) 
+    | "false"     -> BOOL(false)
+    | "else"      -> ELSE
+    | _           -> NAME(s)
+}
+
+let digit = ['0'-'9']
+let whitespace = [' ' '\t' ]
+let newline = ('\n' | '\r' '\n')
+
+
+rule token = parse
+| whitespace     { token lexbuf }
+| newline        { lexbuf.EndPos <- lexbuf.EndPos.NextLine; token lexbuf }
+| "("            { LP }
+| ")"            { RP }
+| "["            { LSP }
+| "]"            { RSP }
+| "{"            { LCP }
+| "}"            { RCP }
+| ","            { COMMA }
+| ";"            { SEMI }
+| ":="           { ASSIGN }
+| "!"            { NEG }
+| "||"           { OR }
+| "&&"           { AND }
+| "!="           { NEQ }
+| "<"            { LT }
+| ">"            { GT }
+| "<="           { LE }
+| ">="           { GE }
+| "*"            { TIMES }
+| "-"            { MINUS }
+| "=="           { EQ }
+| "+"            { PLUS }
+| "/"            { FORWARDSLASH }
+| ['a'-'z']+     { keyword(System.String lexbuf.Lexeme) }
+| ['-']?digit+   { INT (Int32.Parse(System.String lexbuf.Lexeme)) }
+| eof            { EOF }
