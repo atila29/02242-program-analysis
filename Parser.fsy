@@ -50,12 +50,12 @@ Prog:
 
 Stm:
     L ASSIGN A SEMI                          { AssignmentL($1, $3) }
-  | Stm SEMI Stm SEMI                       { Statements($1, $3) }
-  | IF LP B RP LCP Stm RCP ELSE LCP Stm RCP { IfElseStatement($3, $6, $10) }
   | IF LP B RP LCP Stm RCP              { IfStatement($3, $6) }
+  | IF LP B RP LCP Stm RCP ELSE LCP Stm RCP { IfElseStatement($3, $6, $10) }
   | WHILE LP B RP LCP Stm RCP           { WhileStatement($3, $6) }
   | READ L SEMI                              { Read($2) }
   | WRITE A SEMI                            { Write($2) }
+  | Stm Stm                       { Statements($1, $2) }
 
 Dec:
     ITYP NAME SEMI                        { DeclarationX($2) }            // int x;
@@ -64,7 +64,7 @@ Dec:
 
 L:
     NAME                             { LabelX($1) }
-  | NAME LCP A RCP                   { LabelA($1, $3) }
+  | NAME LSP A RSP                   { LabelA($1, $3) }
 
 A:
     INT                              { ArithmeticN($1) }

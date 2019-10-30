@@ -214,6 +214,10 @@ let main argv =
         int x;
         
         x := 4;
+        a[x] := 2;
+        if (a[3] == 12) {
+            x := a[x];
+        }
     }"
     // let graph = convertToProgramGraph ast
 
