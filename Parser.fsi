@@ -35,7 +35,6 @@ type token =
   | ITYP
   | BTYP
   | NAME of (string)
-  | STRING of (string)
   | BOOL of (bool)
   | INT of (int)
 type tokenId = 
@@ -73,7 +72,6 @@ type tokenId =
     | TOKEN_ITYP
     | TOKEN_BTYP
     | TOKEN_NAME
-    | TOKEN_STRING
     | TOKEN_BOOL
     | TOKEN_INT
     | TOKEN_end_of_input

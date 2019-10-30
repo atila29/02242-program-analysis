@@ -14,7 +14,7 @@ let keyword s =
     | "true"      -> BOOL(true) 
     | "false"     -> BOOL(false)
     | "else"      -> ELSE
-    | _           -> NAME s
+    | _           -> NAME(s)
 }
 
 let digit = ['0'-'9']

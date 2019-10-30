@@ -210,14 +210,10 @@ let main argv =
     
     let x ="
     {
-        int[5] A;
+        int[5] a;
         int x;
         
         x := 4;
-        A[x] := 2;
-        if (A[3] == 12) {
-            x := A[x];
-        }
     }"
     // let graph = convertToProgramGraph ast
 
