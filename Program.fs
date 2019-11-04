@@ -58,7 +58,7 @@ let convertToProgramGraph (p: Program) =
                                 | (edges, n) -> (edges@ [Edge(qs, "!" + convertB b, n); Edge(qs, convertB b, qs + 1)], n+1)
         | IfElseStatement(b, s1, s2) -> match convertStatements (qs+1, s1) with
             | (edges1, n1) -> match convertStatements (n1, s2) with
-                | (edges2, n2) -> (fixIfElse edges1 n1 n2 @ edges2 @ [Edge(qs, convertB b, n1-1); Edge(qs, "!" + convertB b, n1)], n2)
+                | (edges2, n2) -> (fixIfElse edges1 n1 n2 @ edges2 @ [Edge(qs, convertB b, qs+1); Edge(qs, "!" + convertB b, n1)], n2)
         | WhileStatement (b, s) -> match convertStatements (qs+1, s) with
                                     | (edges, n) -> (edges @ [Edge(qs, "!" + convertB b, n); Edge(qs, convertB b, qs + 1)], n+1)
         | Read(l) -> ([Edge(qs, "read " + convertL l, qs+1)], qs + 1)
