@@ -47,6 +47,9 @@ rule token = parse
 | "=="           { EQ }
 | "+"            { PLUS }
 | "/"            { FORWARDSLASH }
+| "."            { DOT }
+| "fst"          { FST }
+| "snd"          { SND }
 | ['a'-'z']+     { keyword(System.String lexbuf.Lexeme) }
 | ['-']?digit+   { INT (Int32.Parse(System.String lexbuf.Lexeme)) }
 | eof            { EOF }
