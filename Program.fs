@@ -3,35 +3,10 @@ open System
 open ParsingUtil
 open AbstractSyntaxTree
 
-
-
-
-// int[5] A;
-// int x;
-// x := 4;
-// A[x] := 2;
-// if (A[3] == 12) {
-// x := A[x];
-// }
-
-// digraph program_graph3 {rankdir=TL;
-// node [shape = circle]; q_s;
-// node [shape = doublecircle]; q_e;
-// node [shape = circle];
-//     q_s -> q_1 [label = "int[5] \ A;"];
-//     q_1 -> q_2 [label = "int \ x;"];
-//     q_2 -> q_3 [label = "x := 4;"];
-//     q_3 -> q_4 [label = "A[x] := 2;"];
-//     q_4 -> q_5 [label = "A[3] == 12"];
-//     q_5 -> q_e [label = "x := A[x];"];
-//     q_4 -> q_e [label = "!(A[3] == 12)"];
-// }
-
 type ProgramGraph = Node * Node * Edge List
 and Edge = Node * String * Node
 and Node = int
 
-// q-1 (end) q0 (start) -> q1 -> q2 -> q3
 
 let convertToProgramGraph (p: Program) =
     let rec convertDeclaration ((qs, d): (int * Declaration)) =
@@ -117,79 +92,6 @@ let convertToProgramGraph (p: Program) =
         | dec, stm -> match convertDeclaration (0, dec) with
                         | (edges1, cnt) -> match convertStatements (cnt, stm) with
                                            | (edges2, _) -> (edges1 @ edges2)
-
-// let drawProgram (p: Program) =
-//     let rec drawDeclaration (d: Declaration) =
-//         match d with
-//         | DeclarationX(x) -> "[label = \"int \\ " + x + " ;\"];\n"
-//         | DeclarationA(name, index) -> "[label = \"" + name + " \\ [" +  string index + "] ;\"];\n"  // declaration of array 
-//         | DeclarationR(name) -> ""
-//         | DeclarationD(d, d1) ->  drawDeclaration d + drawDeclaration d1 // using lists solves issue with lastnode and endnode
-
-//     let rec drawStatement (s: Statement) =
-//         match s with
-//         | AssignmentL(l, a) -> "[label = \"" + drawL l + " \\ := \\ " + drawA a + " ;\"];\n"
-//         | AssignmentR(l, l1) -> ""
-//         | IfStatement(b, s) -> "" // if statements was a list you could know the endnode by the length of the list? ...except for nested lists...
-//         | WhileStatement (b, s) -> ""
-//         | Read(l) -> ""
-//         | Write (a) -> ""
-//         | Statements (s, s1) -> drawStatement s + drawStatement s1 // using lists solves issue with lastnode and endnode
-
-//     and drawL (l:L) =
-//         match l with
-//         | LabelX(x) -> x
-//         | LabelA(name, a) -> name + "[" + drawA a + "]"
-//         | LabelFstR -> ""
-//         | LabelSndR -> ""
-
-//     and drawA (a:A) =
-//         match a with
-//         | ArithmeticN(n) -> string n
-//         | ArithmeticX(x) -> x
-//         | ArithmeticA (name, index) -> name + "[" + string index + "]"
-//         | ArithmeticFstR -> ""
-//         | ArithmeticSndR -> ""
-//         | ROp (a, aOp, a1) -> drawA a + drawArithmeticOperator aOp + drawA a1
-
-//     and drawB (b: B) =
-//         match b with
-//         | True -> "true"
-//         | False -> "false"
-//         | AOp(a, rOp, a1) -> drawA a + drawRelationalOperator rOp + drawA a1
-//         | BOp(b, bOp, b1) -> drawB b + drawBooleanOperator bOp + drawB b1
-//         | Not(b) -> "!" + drawB b
-
-
-//     and drawArithmeticOperator (a: ArithmeticOperator) =
-//         match a with
-//         | Plus -> "+"
-//         | Minus -> "-"
-//         | Multiply -> "*"
-//         | Divide -> "/"
-
-//     and drawRelationalOperator (r: RelationalOperator) =
-//         match r with
-//         | LessThan -> "<"
-//         | GreaterThan -> ">"
-//         | LesserOrEqualTo -> "<="
-//         | GreaterOrEqualTo -> ">="
-//         | EqualTo -> "=="
-//         | NotEqualTo -> "!="
-
-//     and drawBooleanOperator (b: BooleanOperator) =
-//         match b with
-//         | AndOp -> "&"
-//         | OrOp -> "|"
-
-//     match p with
-//         | dec, stm -> 
-//             "digraph program_graph3 {rankdir=TL;\n" +
-//             "node [shape = circle]; q_s;\n" +
-//             "node [shape = doublecircle]; q_e;\n" +
-//             "node [shape = circle];\n" + 
-//             drawDeclaration dec + drawStatement stm + 
-//             "}"
 
 [<EntryPoint>]
 let main argv =
