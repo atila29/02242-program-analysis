@@ -235,7 +235,11 @@ let main argv =
 
     let tokens = parseString x
     //let y = SqlParser.start SqlLexer.tokenize lexbuf   
-    printfn "%A" tokens  
+    // printfn "%A" tokens
+
+    let graph = convertToProgramGraph tokens
+
+    printfn "%A" graph
 
     printfn "set breakpoint to see ast value"
 
