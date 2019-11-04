@@ -23,6 +23,7 @@ and L =
 | LabelA of String * A
 | LabelFstR of String
 | LabelSndR of String
+
 and A =
 | ArithmeticN of int
 | ArithmeticX of string
@@ -30,6 +31,7 @@ and A =
 | ArithmeticFstR of string
 | ArithmeticSndR of string
 | ROp of A * ArithmeticOperator * A
+
 and B =
 | BoolValue of bool
 | AOp of A * RelationalOperator * A

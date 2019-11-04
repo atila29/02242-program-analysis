@@ -2,6 +2,9 @@
 module Parser
 type token = 
   | EOF
+  | DOT
+  | FST
+  | SND
   | ASSIGN
   | READ
   | WRITE
@@ -39,6 +42,9 @@ type token =
   | INT of (int)
 type tokenId = 
     | TOKEN_EOF
+    | TOKEN_DOT
+    | TOKEN_FST
+    | TOKEN_SND
     | TOKEN_ASSIGN
     | TOKEN_READ
     | TOKEN_WRITE
