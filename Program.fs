@@ -219,22 +219,23 @@ let main argv =
     
 
     
-    //let x ="
-    //{
-    //    int[5] a;
-    //    int x;
+    let x ="
+    {
+       int[5] a;
+       int x;
         
-    //    x := 4;
-    //    a[x] := 2;
-    //    if (a[3] == 12) {
-    //        x := a[x];
-    //    }
-    //}"
-     let graph = convertToProgramGraph ast
+       x := 4;
+       a[x] := 2;
+       if (a[3] == 12) {
+           x := a[x];
+       }
+    }"
 
-    //let tokens = parseString x
+    // let graph = convertToProgramGraph ast
+
+    let tokens = parseString x
     //let y = SqlParser.start SqlLexer.tokenize lexbuf   
-    //printfn "%A" tokens  
+    printfn "%A" tokens  
 
     printfn "set breakpoint to see ast value"
 

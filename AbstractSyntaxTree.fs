@@ -26,7 +26,7 @@ and L =
 and A =
 | ArithmeticN of int
 | ArithmeticX of string
-| ArithmeticA of string * int
+| ArithmeticA of string * A
 | ArithmeticFstR of string
 | ArithmeticSndR of string
 | ROp of A * ArithmeticOperator * A
