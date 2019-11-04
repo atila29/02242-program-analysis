@@ -87,8 +87,7 @@ let convertToProgramGraph (p: Program) =
 
     and convertB (b: B) =
         match b with
-        | True -> "true"
-        | False -> "false"
+        | BoolValue(b) -> string b
         | AOp(a1, rOp, a2) -> convertA a1 + convertRelOp rOp + convertA a2
         | BOp(b1, bOp, b2) -> convertB b1 + convertBoolOp bOp + convertB b2
         | Not(b) -> "!" + convertB b
