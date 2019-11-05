@@ -3,15 +3,15 @@ module ProgramGraph
 open AbstractSyntaxTree
 
 [<StructuredFormatDisplay("{AsString}")>]
-type Label = 
-| LabelDeclarationX of string
-| LabelDeclarationA of string * int
-| LabelDeclarationR of string
-| LabelAssignmentL of L * A
-| LabelAssignmentR of string * A * A
-| LabelRead of L
-| LabelWrite of A
-| LabelBool of B
+type Action = 
+| ActionDeclarationX of string
+| ActionDeclarationA of string * int
+| ActionDeclarationR of string
+| ActionAssignmentL of L * A
+| ActionAssignmentR of string * A * A
+| ActionRead of L
+| ActionWrite of A
+| ActionBool of B
     override l.ToString() = 
         let convertArithOp (a: ArithmeticOperator) =
             match a with
@@ -58,28 +58,28 @@ type Label =
             | Not(b) -> "!" + convertB b
     
         match l with
-                | LabelDeclarationX(s) -> "int " + s
-                | LabelDeclarationA(name, index) ->  "int[" + string index + "] " + name
-                | LabelDeclarationR(name) -> "{int fst; int snd} " + name
-                | LabelAssignmentL(label, a) -> convertL label + ":=" + convertA a
-                | LabelAssignmentR(name, a1, a2) -> name + ":=(" + convertA a1 + "," + convertA a2 + ")"
-                | LabelRead(l) -> "read " + convertL l
-                | LabelWrite(a) -> "write" + convertA a
-                | LabelBool(b) -> convertB b
+                | ActionDeclarationX(s) -> "int " + s
+                | ActionDeclarationA(name, index) ->  "int[" + string index + "] " + name
+                | ActionDeclarationR(name) -> "{int fst; int snd} " + name
+                | ActionAssignmentL(label, a) -> convertL label + ":=" + convertA a
+                | ActionAssignmentR(name, a1, a2) -> name + ":=(" + convertA a1 + "," + convertA a2 + ")"
+                | ActionRead(l) -> "read " + convertL l
+                | ActionWrite(a) -> "write" + convertA a
+                | ActionBool(b) -> convertB b
 
         member l.AsString = l.ToString()
 
 type ProgramGraph = Node * Node * Edge List
-and Edge = Node * Label * Node
+and Edge = Node * Action * Node
 and Node = int
 
 
 let convertToProgramGraph (p: Program) =
     let rec convertDeclaration ((qs, d): (int * Declaration)) =
         match d with
-        | DeclarationX(x) -> ([Edge(qs, LabelDeclarationX(x), qs+1)], qs+1) 
-        | DeclarationA(name, index) -> ([Edge(qs, LabelDeclarationA(name, index), qs+1)], qs+1)
-        | DeclarationR(name) -> ([Edge(qs, LabelDeclarationR(name), qs+1)], qs+1)
+        | DeclarationX(x) -> ([Edge(qs, ActionDeclarationX(x), qs+1)], qs+1) 
+        | DeclarationA(name, index) -> ([Edge(qs, ActionDeclarationA(name, index), qs+1)], qs+1)
+        | DeclarationR(name) -> ([Edge(qs, ActionDeclarationR(name), qs+1)], qs+1)
         | DeclarationD(d1, d2) -> 
             match convertDeclaration (qs, d1) with 
             | (lst, cnt) -> match convertDeclaration (cnt, d2) with
@@ -94,17 +94,17 @@ let convertToProgramGraph (p: Program) =
 
     let rec convertStatements ((qs, s): (int * Statement)) =
         match s with
-        | AssignmentL(l, a) -> ([Edge(qs, LabelAssignmentL(l, a), qs + 1)], qs + 1) 
-        | AssignmentR(n, a1, a2) -> ([Edge(qs, LabelAssignmentR(n, a1, a2), qs + 1)], qs + 1)
+        | AssignmentL(l, a) -> ([Edge(qs, ActionAssignmentL(l, a), qs + 1)], qs + 1) 
+        | AssignmentR(n, a1, a2) -> ([Edge(qs, ActionAssignmentR(n, a1, a2), qs + 1)], qs + 1)
         | IfStatement(b, s) -> match convertStatements (qs+1, s) with
-                                | (edges, n) -> (edges@ [Edge(qs, LabelBool(Not(b)), n); Edge(qs, LabelBool(b), qs + 1)], n+1)
+                                | (edges, n) -> (edges@ [Edge(qs, ActionBool(Not(b)), n); Edge(qs, ActionBool(b), qs + 1)], n+1)
         | IfElseStatement(b, s1, s2) -> match convertStatements (qs+1, s1) with
                                         | (edges1, n1) -> match convertStatements (n1, s2) with
-                                                            | (edges2, n2) -> (fixIfElse edges1 n1 n2 @ edges2 @ [Edge(qs, LabelBool(b), qs+1); Edge(qs, LabelBool(Not(b)), n1)], n2)
+                                                            | (edges2, n2) -> (fixIfElse edges1 n1 n2 @ edges2 @ [Edge(qs, ActionBool(b), qs+1); Edge(qs, ActionBool(Not(b)), n1)], n2)
         | WhileStatement (b, s) -> match convertStatements (qs+1, s) with
-                                    | (edges, n) -> (edges @ [Edge(qs, LabelBool(Not(b)), n); Edge(qs, LabelBool(b), qs + 1)], n+1)
-        | Read(l) -> ([Edge(qs, LabelRead(l), qs+1)], qs + 1)
-        | Write(a) -> ([Edge(qs, LabelWrite(a), qs+1)], qs + 1)
+                                    | (edges, n) -> (edges @ [Edge(qs, ActionBool(Not(b)), n); Edge(qs, ActionBool(b), qs + 1)], n+1)
+        | Read(l) -> ([Edge(qs, ActionRead(l), qs+1)], qs + 1)
+        | Write(a) -> ([Edge(qs, ActionWrite(a), qs+1)], qs + 1)
         | Statements (s1, s2) -> 
             match convertStatements (qs, s1) with
               | (lst, cnt) -> match convertStatements (cnt, s2) with

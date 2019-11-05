@@ -28,7 +28,7 @@ let main argv =
     printfn "set breakpoint to see ast value"
 
 
-    // let labelTest = LabelBool(Not(BoolValue(true)))
+    // let labelTest = ActionBool(Not(BoolValue(true)))
 
     // printfn labelTest
 
