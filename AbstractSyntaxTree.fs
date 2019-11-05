@@ -1,11 +1,10 @@
 ﻿module AbstractSyntaxTree
-open System
 
 type Program = Declaration * Statement
 
 and Statement =
 | AssignmentL of L * A
-| AssignmentR of String * A * A
+| AssignmentR of string * A * A
 | Statements of Statement * Statement
 | IfStatement of B * Statement
 | IfElseStatement of B * Statement * Statement
@@ -19,10 +18,10 @@ and Expression = // shouldn't these be used in statements?
 | ExpB of B
 
 and L =
-| LabelX of String
-| LabelA of String * A
-| LabelFstR of String
-| LabelSndR of String
+| LabelX of string
+| LabelA of string * A
+| LabelFstR of string
+| LabelSndR of string
 
 and A =
 | ArithmeticN of int
