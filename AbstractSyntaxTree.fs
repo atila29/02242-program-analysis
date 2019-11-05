@@ -60,6 +60,7 @@ and BooleanOperator =
 
 
 and Declaration =
+    | DeclarationEmpty
     | DeclarationX of string                    // Declaration of variable 
     | DeclarationA of string * int              // declaration of array 
     | DeclarationR of string                    // Declaration of record
