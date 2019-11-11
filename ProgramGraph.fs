@@ -74,6 +74,47 @@ and Edge = Node * Action * Node
 and Node = int
 
 
+let variables (edges: Edge List): Set<string> =
+  let variablesSingle (action: Action): Set<string> = 
+    let rec variablesA (a: A) = 
+      match a with
+      | ArithmeticX(x)
+      | ArithmeticFstR(x)
+      | ArithmeticSndR(x) -> Set.singleton x
+      | ArithmeticA(x, a2) -> Set.union (Set.singleton x) (variablesA a2)
+      | ROp(a1, _, a2) -> Set.union (variablesA a1) (variablesA a2)
+      | _ -> Set.empty
+
+    let variablesL (l: L) = 
+      match l with
+      | LabelX(x)
+      | LabelFstR(x)
+      | LabelSndR(x) -> Set.singleton x
+      | LabelA(x, a) -> Set.union (Set.singleton x) (variablesA a)
+
+    let variablesB (b: B) =
+      match b with
+      | AOp(a1, _, a2) -> variablesA a1 + variablesA a2
+      | _ -> Set.empty
+
+    match action with
+    | ActionDeclarationX(x)
+    | ActionDeclarationA(x, _)
+    | ActionDeclarationR(x) -> Set.singleton x
+    | ActionAssignmentL(l, a) -> Set.union (variablesL l) (variablesA a)
+    | ActionAssignmentR(x, a1, a2) -> Set.singleton x + variablesA a1 + variablesA a2
+    | ActionRead(l) -> variablesL l
+    | ActionWrite(a) -> variablesA a
+    | ActionBool(b) -> variablesB b
+
+  let rec variablesRec (edges: Edge List) (set: Set<string>) =
+    match edges with
+    | (_, action, _) :: tail -> variablesRec tail (set + variablesSingle action)
+    | [] -> set
+  
+  variablesRec edges Set.empty
+
+
 let convertToProgramGraph (p: Program) =
     let rec convertDeclaration ((qs, d): (int * Declaration)) =
         match d with
