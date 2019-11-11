@@ -76,7 +76,7 @@ let analyse (pg: ProgramGraph) =
   let rd =  ([startnode + 1 .. endnode] |> List.map (fun i -> i, Set.empty<ReachingDefintion>) |> Map.ofList)
   
   // Todo: Need to find a better way to add this default element...
-  let rd = rd.Add(startnode, cartesianNullableList (variables edges) [startnode .. endnode])
+  let rd = rd.Add(startnode, cartesianNullableList (variables pg) [startnode .. endnode])
 
   // Algorithm here
   let rec loop (edges: Edge List) (rd: Map<Node, Set<ReachingDefintion>>) =
