@@ -23,7 +23,9 @@ let main argv =
 
     printfn "%A" graph
 
-    ReachingDefinitions.analyse graph |> ignore
+    let idk = ReachingDefinitions.analyse graph
+
+    printfn "%A" idk
 
     printfn "set breakpoint to see ast value"
 
