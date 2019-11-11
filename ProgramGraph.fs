@@ -74,7 +74,7 @@ and Edge = Node * Action * Node
 and Node = int
 
 
-let variables (edges: Edge List): Set<string> =
+let variables (pg: ProgramGraph): Set<string> =
   let variablesSingle (action: Action): Set<string> = 
     let rec variablesA (a: A) = 
       match a with
@@ -112,6 +112,7 @@ let variables (edges: Edge List): Set<string> =
     | (_, action, _) :: tail -> variablesRec tail (set + variablesSingle action)
     | [] -> set
   
+  let (_, _, edges) = pg;
   variablesRec edges Set.empty
 
 
