@@ -66,7 +66,10 @@ let updateKillGenSet (edge: Edge) (bigQ: Node List) (rd: Map<Node, Set<ReachingD
   let kills = killset action bigQ
   let gens = genset qs action qe
 
-  let newSet = Set.union (Set.difference (rd.Item qe) kills) gens
+  let t = rd.Item qs
+  let e = rd.Item qe
+
+  let newSet = rd.Item qe + (rd.Item qs - kills) + gens
   rd.Add(qe, newSet)
 
 
