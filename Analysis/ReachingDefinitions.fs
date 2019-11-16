@@ -7,7 +7,7 @@ open AbstractSyntaxTree
 type ReachingDefintion = string * Node option * Node
 
 let cartesianNullable (x: string) (q: Node List): Set<ReachingDefintion> =
-  let l = None :: (q |> List.map (fun i -> Some i))
+  let l = None :: (q |> List.map Some)
 
   let rec iterateEndingElem (x: string) (startingItem: Option<Node>) (endingItems: Node List): Set<ReachingDefintion> = 
     match endingItems with

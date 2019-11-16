@@ -50,6 +50,7 @@ rule token = parse
 | "."            { DOT }
 | "fst"          { FST }
 | "snd"          { SND }
-| ['a'-'z']+     { keyword(System.String lexbuf.Lexeme) }
+| ['a'-'z']+   { keyword(System.String lexbuf.Lexeme) }
+| ['A'-'Z']+   { keyword(System.String lexbuf.Lexeme) }
 | ['-']?digit+   { INT (Int32.Parse(System.String lexbuf.Lexeme)) }
 | eof            { EOF }
