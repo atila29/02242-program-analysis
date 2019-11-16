@@ -2,9 +2,6 @@
 module Parser
 type token = 
   | EOF
-  | DOT
-  | FST
-  | SND
   | ASSIGN
   | READ
   | WRITE
@@ -29,22 +26,22 @@ type token =
   | IF
   | WHILE
   | ELSE
+  | ITYP
+  | BTYP
+  | DOT
+  | FST
+  | SND
+  | NAME of (string)
+  | BOOL of (bool)
+  | INT of (int)
   | LP
   | LCP
   | LSP
   | RP
   | RCP
   | RSP
-  | ITYP
-  | BTYP
-  | NAME of (string)
-  | BOOL of (bool)
-  | INT of (int)
 type tokenId = 
     | TOKEN_EOF
-    | TOKEN_DOT
-    | TOKEN_FST
-    | TOKEN_SND
     | TOKEN_ASSIGN
     | TOKEN_READ
     | TOKEN_WRITE
@@ -69,17 +66,20 @@ type tokenId =
     | TOKEN_IF
     | TOKEN_WHILE
     | TOKEN_ELSE
+    | TOKEN_ITYP
+    | TOKEN_BTYP
+    | TOKEN_DOT
+    | TOKEN_FST
+    | TOKEN_SND
+    | TOKEN_NAME
+    | TOKEN_BOOL
+    | TOKEN_INT
     | TOKEN_LP
     | TOKEN_LCP
     | TOKEN_LSP
     | TOKEN_RP
     | TOKEN_RCP
     | TOKEN_RSP
-    | TOKEN_ITYP
-    | TOKEN_BTYP
-    | TOKEN_NAME
-    | TOKEN_BOOL
-    | TOKEN_INT
     | TOKEN_end_of_input
     | TOKEN_error
 type nonTerminalId = 
@@ -88,6 +88,7 @@ type nonTerminalId =
     | NONTERM_Main
     | NONTERM_Prog
     | NONTERM_Stm
+    | NONTERM_Ass
     | NONTERM_Dec
     | NONTERM_L
     | NONTERM_A

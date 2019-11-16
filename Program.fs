@@ -33,14 +33,14 @@ let main argv =
 
     let test_2_3 = "
     {
-        {int fst; int snd} r;
+        {int fst; int snd} R;
         int x;
         x := 2*2;
-        r := (1, 10);
+        R := (1, 10);
 
         if (x == 4)
         {
-            r.fst := x;
+            R.fst := x;
             x := R.snd;
         }
     }"
