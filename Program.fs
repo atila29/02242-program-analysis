@@ -30,6 +30,24 @@ let main argv =
     printfn "set breakpoint to see ast value"
 
 
+
+    let test_2_3 = "
+    {
+        {int fst; int snd} R;
+        int x;
+        x := 2*2;
+        R := (1, 10);
+
+        if (x == 4)
+        {
+            R.fst := x;
+            x := R.snd;
+        }
+    }"
+
+    printf "%A" (ReachingDefinitions.analyse (convertToProgramGraph (parseString test_2_3)))
+
+
     // let labelTest = ActionBool(Not(BoolValue(true)))
 
     // printfn labelTest
