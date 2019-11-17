@@ -22,10 +22,6 @@ let cartesianNullable (x: string) (q: Node List): Set<ReachingDefinition> =
   
   iterateStartingElem x l q
 
-let cartesianNullableList (xs: Set<string>) (q: Node List): Set<ReachingDefinition> =
-  Set.foldBack (fun x acc -> acc + cartesianNullable x q) xs Set.empty
-
-
 let init (xs: Set<string>) (qs: Node): Set<ReachingDefinition> =
   Set.foldBack (fun x acc -> Set.add (ReachingDefinition(x, None, qs)) acc) xs Set.empty
 
