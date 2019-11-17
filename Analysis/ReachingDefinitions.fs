@@ -98,12 +98,3 @@ let analyse (pg: ProgramGraph) =
     rd <- updateAllEdges edges rd nodeList
 
   rd
-
-
-
-  //let rec loop (edges: Edge List) (rd: Map<Node, Set<ReachingDefinition>>) =
-  //  match edges with
-  //    | head :: tail -> loop tail (updateKillGenSet head nodeList rd)
-  //    | [] -> rd
-
-  //loop edges rd
