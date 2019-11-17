@@ -22,8 +22,6 @@ let cartesianNullable (x: string) (q: Node List): Set<ReachingDefinition> =
   
   iterateStartingElem x l q
 
-let init (xs: Set<string>) (qs: Node): Set<ReachingDefinition> =
-  Set.foldBack (fun x acc -> Set.add (ReachingDefinition(x, None, qs)) acc) xs Set.empty
 
 
 let killset (action: Action) (bigQ: Node List): Set<ReachingDefinition> =
@@ -59,31 +57,53 @@ let genset (qs: Node) (action: Action) (qe: Node): Set<ReachingDefinition> =
   | _ -> Set.empty
 
 
-
-let updateKillGenSet (edge: Edge) (bigQ: Node List) (rd: Map<Node, Set<ReachingDefinition>>): Map<Node, Set<ReachingDefinition>> =
+let killGenSetResult (edge: Edge) (nodes: Node List) (rd: Map<Node, ReachingDefinition Set>): ReachingDefinition Set = 
   let (qs, action, qe) = edge
-  let kills = killset action bigQ
+  let kills = killset action nodes
   let gens = genset qs action qe
 
-  let t = rd.Item qs
-  let e = rd.Item qe
+  rd.Item qe + (rd.Item qs - kills) + gens
 
-  let newSet = rd.Item qe + (rd.Item qs - kills) + gens
+
+let updateKillGenSet (edge: Edge) (nodes: Node List) (rd: Map<Node, Set<ReachingDefinition>>): Map<Node, Set<ReachingDefinition>> =
+  let newSet = killGenSetResult edge nodes rd
+  let (_, _, qe) = edge
   rd.Add(qe, newSet)
 
 
 let analyse (pg: ProgramGraph) = 
+  let init (xs: Set<string>) (qs: Node): Set<ReachingDefinition> =
+    Set.foldBack (fun x acc -> Set.add (ReachingDefinition(x, None, qs)) acc) xs Set.empty
+
+  let needsUpdating (edges: Edge List) (rd: Map<Node, ReachingDefinition Set>) (nodes: Node List) : bool =
+    List.exists (fun edge -> 
+      let res = killGenSetResult edge nodes rd
+      let (_, _, qe) = edge;
+      match rd.TryFind qe with
+      | Some(x) -> not (res.IsSubsetOf x)
+      | None -> false
+      ) edges
+
+  let updateAllEdges (edges: Edge List) (rd: Map<Node, ReachingDefinition Set>) (nodes: Node List) : Map<Node, ReachingDefinition Set> =
+    List.foldBack (fun edge acc -> updateKillGenSet edge nodes acc) edges rd
+
   let (startnode, endnode, edges) = pg;
   let nodeList = [startnode .. endnode];
-  let rd =  ([startnode + 1 .. endnode] |> List.map (fun i -> i, Set.empty<ReachingDefinition>) |> Map.ofList)
+  let mutable rd =  ([startnode + 1 .. endnode] |> List.map (fun i -> i, Set.empty<ReachingDefinition>) |> Map.ofList)
   
-  // Todo: Need to find a better way to add this default element...
-  let rd = rd.Add(startnode, init (variables pg) startnode)
+  rd <- rd.Add(startnode, init (variables pg) startnode)
 
   // Algorithm here
-  let rec loop (edges: Edge List) (rd: Map<Node, Set<ReachingDefinition>>) =
-    match edges with
-      | head :: tail -> loop tail (updateKillGenSet head nodeList rd)
-      | [] -> rd
+  while needsUpdating edges rd nodeList do
+    rd <- updateAllEdges edges rd nodeList
 
-  loop edges rd
+  rd
+
+
+
+  //let rec loop (edges: Edge List) (rd: Map<Node, Set<ReachingDefinition>>) =
+  //  match edges with
+  //    | head :: tail -> loop tail (updateKillGenSet head nodeList rd)
+  //    | [] -> rd
+
+  //loop edges rd
