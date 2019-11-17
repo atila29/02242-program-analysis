@@ -1,9 +1,9 @@
-﻿module Worklist
+﻿module Worklist.Implementation
 
 open Worklist.Interface
 open System.Collections.Generic
 
-type WorklistFifo<'T> (elems : seq<'T>) = 
+type WorklistQueue<'T> (elems : 'T seq) = 
   member internal this.queue = 
     let q = new Queue<'T>()
     for e in elems do
@@ -24,3 +24,4 @@ type WorklistFifo<'T> (elems : seq<'T>) =
     member this.Extract = 
       let head = this.queue.Dequeue()
       (head, this :> IWorklist<'T>)
+
