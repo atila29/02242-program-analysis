@@ -2,7 +2,8 @@
 
 open ProgramGraph
 
-type AnalysisAssignment<'T when 'T : comparison> = Map<Node, 'T Set>
+type AnalysisMapping<'T when 'T : comparison> = Map<string, 'T Set>
+and AnalysisAssignment<'T when 'T : comparison> = Map<Node, 'T AnalysisMapping>
 
 // The pointed semi-lattice
 type AnalysisDomain<'T when 'T : comparison> = 
@@ -15,11 +16,11 @@ type AnalysisDomain<'T when 'T : comparison> =
 type AnalysisSpecification<'T when 'T : comparison> = 
   {
     domain: 'T AnalysisDomain
-    mapping: Edge -> 'T AnalysisAssignment -> 'T Set
+    mapping: Edge -> 'T AnalysisAssignment -> 'T AnalysisMapping
     initial: 'T Set
   }
 
-let analyse (spec: 'T AnalysisSpecification) (pg: ProgramGraph) : 'T AnalysisAssignment =
+let analyseMonotone (spec: 'T AnalysisSpecification) (pg: ProgramGraph) : 'T AnalysisAssignment =
   let needsUpdating (spec: 'T AnalysisSpecification) (edges: Edge List) (resultSet: 'T AnalysisAssignment) : bool =
     List.exists (fun edge -> 
       let newVal = spec.mapping edge resultSet
