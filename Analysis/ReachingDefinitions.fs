@@ -31,7 +31,10 @@ let genset (edge: Edge) (mapping: ReachingDefinition AnalysisMapping): ReachingD
     | LabelA(x, _)
     | LabelFstR(x)
     | LabelSndR(x) -> mapping.Add(x, Set.singleton (ReachingDefinition(Some(qs), qe)))
-  | ActionAssignmentR(r, _, _) -> mapping.Add(r, Set.singleton (ReachingDefinition(Some(qs), qe)))
+  | ActionDeclarationX(x)
+  | ActionDeclarationA(x, _)
+  | ActionDeclarationR(x)
+  | ActionAssignmentR(x, _, _) -> mapping.Add(x, Set.singleton (ReachingDefinition(Some(qs), qe)))
   | ActionRead(l) -> 
     match l with
     | LabelX(x)
