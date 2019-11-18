@@ -115,7 +115,6 @@ let variables (pg: ProgramGraph): Set<string> =
   let (_, _, edges) = pg;
   variablesRec edges Set.empty
 
-
 let convertToProgramGraph (p: Program) =
     let rec convertDeclaration ((qs, d): (int * Declaration)) =
         match d with

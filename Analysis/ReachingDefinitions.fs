@@ -39,6 +39,19 @@ let genset (edge: Edge) (mapping: ReachingDefinition AnalysisMapping): ReachingD
     | _ -> mapping
   | _ -> mapping
 
+let variableInAction (action: Action) : string option =
+  match action with
+  | ActionDeclarationX(x)
+  | ActionDeclarationA(x, _)
+  | ActionDeclarationR(x)
+  | ActionAssignmentR(x, _, _) -> Some x
+  | ActionRead(x)
+  | ActionAssignmentL(x, _) -> match x with
+                                | LabelX(x)
+                                | LabelA(x, _)
+                                | LabelFstR(x)
+                                | LabelSndR(x) -> Some x
+  | _ -> None
 
 let killGenSetResult (edge: Edge) (rd: ReachingDefinition AnalysisAssignment): ReachingDefinition AnalysisMapping = 
   let (qs, action, qe) = edge
@@ -47,24 +60,43 @@ let killGenSetResult (edge: Edge) (rd: ReachingDefinition AnalysisAssignment): R
   let kills = killset action oldNodeMapping
   let gens = genset edge newNodeMapping
   
-  let x = ""
+  let var = variableInAction action
+  match var with
+  | Some x -> let updatedMapping = (oldNodeMapping.Item x - kills.Item x) + gens.Item x 
+              newNodeMapping.Add(x, updatedMapping)
+  | None -> newNodeMapping
+  
 
-  let updatedMapping = (oldNodeMapping.Item x - kills.Item x) + gens.Item x 
-  newNodeMapping.Add(x, updatedMapping)
+// These probably need to be made into some sort of common module, because
+// they will be used in more implementations
+let relation (t1: ReachingDefinition AnalysisMapping) (t2: ReachingDefinition AnalysisMapping) : bool =
+  Map.forall (fun key value -> Set.isSubset value (t2.Item key) ) t1
+
+let join (t1: ReachingDefinition AnalysisMapping) (t2: ReachingDefinition AnalysisMapping) : ReachingDefinition AnalysisMapping =
+  // Good luck
+  Map.fold (fun acc key value -> acc.Add(key, (acc.Item key + value))) t1 t2
+
+let bottom (xs: string Set) : ReachingDefinition AnalysisMapping = 
+  xs |> Set.toSeq |> Seq.map (fun x -> (x, Set.empty)) |> Map.ofSeq
+
+let initial (xs: string Set) (qs: Node) : ReachingDefinition AnalysisMapping =
+  xs |> Set.toSeq |> Seq.map (fun x -> (x, Set.singleton (ReachingDefinition(None, qs)))) |> Map.ofSeq
+
 
 let analyse (pg: ProgramGraph) = 
+  let (qs, _, _) = pg
   let domain : ReachingDefinition AnalysisDomain = 
     {
-      relation = Set.isSubset
-      join = Set.union
-      bottom = Set.empty
+      relation = relation
+      join = join
+      bottom = bottom (variables pg)
     }
 
   let spec : ReachingDefinition AnalysisSpecification = 
     {
       domain = domain
       mapping = killGenSetResult
-      initial = Set.empty
+      initial = initial (variables pg) qs
     }
 
   analyseMonotone spec pg
