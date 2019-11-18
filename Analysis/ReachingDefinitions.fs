@@ -6,23 +6,23 @@ open AbstractSyntaxTree
 
 type ReachingDefinition = Node option * Node
 
-let killset (action: Action) (mapping: ReachingDefinition AnalysisMapping) : ReachingDefinition AnalysisMapping =
+let killset (action: Action) : ReachingDefinition Set option =
   match action with
   | ActionDeclarationX(x)
   | ActionDeclarationA(x, _)
-  | ActionDeclarationR(x) -> mapping.Add(x, Set.empty)
+  | ActionDeclarationR(x) -> Some Set.empty
   | ActionAssignmentL(l, _) -> 
     match l with
-    | LabelX(x) -> mapping.Add(x, Set.empty)
-    | _ -> mapping
-  | ActionAssignmentR(r, _, _) -> mapping.Add(r, Set.empty)
+    | LabelX(x) -> Some Set.empty
+    | _ -> None
+  | ActionAssignmentR(r, _, _) -> Some Set.empty
   | ActionRead(a) -> 
     match a with
-    | LabelX(x) -> mapping.Add(x, Set.empty)
-    | _ -> mapping
-  | _ -> mapping
+    | LabelX(x) -> Some Set.empty
+    | _ -> None
+  | _ -> None
 
-let genset (edge: Edge) (mapping: ReachingDefinition AnalysisMapping): ReachingDefinition AnalysisMapping =
+let genset (edge: Edge) : ReachingDefinition Set =
   let (qs, action, qe) = edge
   match action with
   | ActionAssignmentL(l, _) -> 
@@ -30,17 +30,17 @@ let genset (edge: Edge) (mapping: ReachingDefinition AnalysisMapping): ReachingD
     | LabelX(x)
     | LabelA(x, _)
     | LabelFstR(x)
-    | LabelSndR(x) -> mapping.Add(x, Set.singleton (ReachingDefinition(Some(qs), qe)))
+    | LabelSndR(x) -> Set.singleton (ReachingDefinition(Some(qs), qe))
   | ActionDeclarationX(x)
   | ActionDeclarationA(x, _)
   | ActionDeclarationR(x)
-  | ActionAssignmentR(x, _, _) -> mapping.Add(x, Set.singleton (ReachingDefinition(Some(qs), qe)))
+  | ActionAssignmentR(x, _, _) -> Set.singleton (ReachingDefinition(Some(qs), qe))
   | ActionRead(l) -> 
     match l with
     | LabelX(x)
-    | LabelA(x, _) -> mapping.Add(x, Set.singleton (ReachingDefinition(Some(qs), qe)))
-    | _ -> mapping
-  | _ -> mapping
+    | LabelA(x, _) -> Set.singleton (ReachingDefinition(Some(qs), qe))
+    | _ -> Set.empty
+  | _ -> Set.empty
 
 let variableInAction (action: Action) : string option =
   match action with
@@ -60,14 +60,20 @@ let killGenSetResult (edge: Edge) (rd: ReachingDefinition AnalysisAssignment): R
   let (qs, action, qe) = edge
   let oldNodeMapping = rd.Item qs
   let newNodeMapping = rd.Item qe
-  let kills = killset action oldNodeMapping
-  let gens = genset edge newNodeMapping
+  let kills = killset action
+  let gens = genset edge
   
   let var = variableInAction action
   match var with
-  | Some x -> let updatedMapping = (oldNodeMapping.Item x - kills.Item x) + gens.Item x 
-              newNodeMapping.Add(x, updatedMapping)
-  | None -> newNodeMapping
+  | Some x -> match kills with
+              | Some k -> let updatedMapping = k + gens
+                          oldNodeMapping.Add(x, updatedMapping)
+              | None -> let updatedMapping = oldNodeMapping.Item x + gens
+                        oldNodeMapping.Add(x, updatedMapping)
+  
+  //let updatedMapping = (oldNodeMapping.Item x - kills) + gens
+  //            newNodeMapping.Add(x, updatedMapping)
+  | None -> oldNodeMapping
   
 
 // These probably need to be made into some sort of common module, because
