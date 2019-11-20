@@ -12,11 +12,6 @@ and Statement =
 | Read of L
 | Write of A
 
-and Expression = // shouldn't these be used in statements?
-| ExpL of L
-| ExpA of A
-| ExpB of B
-
 and L =
 | LabelX of string
 | LabelA of string * A

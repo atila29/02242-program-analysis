@@ -20,9 +20,9 @@
     <Compile Include="Lexer.fs" />
     <Compile Include="ParsingUtil.fs" />
     <Compile Include="ProgramGraph.fs" />
-    <Compile Include="Monotone/MonotoneFramework.fs" />
     <Compile Include="Worklist/IWorklist.fs" />
     <Compile Include="Worklist/Worklist.fs" />
+    <Compile Include="Monotone/MonotoneFramework.fs" />
     <Compile Include="Analysis/ReachingDefinitions.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
