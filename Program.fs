@@ -35,7 +35,7 @@ let main argv =
         {int fst; int snd} R;
         int x;
         x := 2*2;
-        R := (1, 10);
+        R := (1, -10);
 
         if (x == 4)
         {
@@ -50,7 +50,7 @@ let main argv =
 
     let worklist = new WorklistQueue<Node>()
 
-    printf "AnalysisAssigenment:\n%A" (ReachingDefinitions.analyse graph2 worklist)
+    printf "AnalysisAssigenment:\n%A" (DetectionOfSigns.analyse graph2 worklist)
 
     // Exit code
     0
