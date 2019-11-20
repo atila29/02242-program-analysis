@@ -5,6 +5,7 @@ open Worklist.Implementation
 
 [<EntryPoint>]
 let main argv =
+    
     //let x ="
     //{
     //   int[5] a;
@@ -34,8 +35,10 @@ let main argv =
     {
         {int fst; int snd} R;
         int x;
+        int[5] A;
         x := 2*2;
         R := (1, -10);
+        A[-1] := 5;
 
         if (x == 4)
         {

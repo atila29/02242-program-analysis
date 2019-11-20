@@ -103,9 +103,9 @@ let bot: Sign Set = Set.empty
 // it just makes propegating an error that much easier
 // without having to raise and handle exceptions
 let mutable globalFail = false;
-let failedbefore: bool =
+let failedbefore(): bool =
   globalFail
-let propegateFail: unit =
+let propegateFail(): unit =
   globalFail <- true
 
 let mapping (edge: Edge) (ds: DetectionOfSigns AnalysisAssignment): DetectionOfSigns AnalysisMapping =
@@ -118,42 +118,42 @@ let mapping (edge: Edge) (ds: DetectionOfSigns AnalysisAssignment): DetectionOfS
   | ActionAssignmentL(l, a) -> 
     match l with
     | LabelX(x) ->  match (mapArith a ds qs) with
-                    | signs when signs <> Set.empty && not failedbefore -> old.Add(x, signs)
-                    | _ -> propegateFail
+                    | signs when signs <> Set.empty && not (failedbefore()) -> old.Add(x, signs)
+                    | _ -> propegateFail()
                            old.Add(x, bot)
     | LabelA(x, a') -> match ((mapArith a' ds qs), (mapArith a ds qs)) with  
-                        |(aIndex, signs) when aIndex |> Set.intersect (Set.ofList [Zero; Positive]) = Set.empty && signs <> Set.empty && not failedbefore -> old.Add(x, signs)
-                        | _ ->  propegateFail
+                        |(aIndex, signs) when aIndex |> Set.intersect (Set.ofList [Zero; Positive]) <> Set.empty && signs <> Set.empty && not (failedbefore()) -> old.Add(x, signs)
+                        | _ ->  propegateFail()
                                 old.Add(x, bot)
     | LabelFstR(x) -> match (mapArith a ds qs) with
-                      | signs when signs <> Set.empty && not failedbefore -> old.Add(x + ".fst", signs)
-                      | _ -> propegateFail
-                             old.Add(x, bot) 
+                      | signs when signs <> Set.empty && not (failedbefore()) -> old.Add(x + ".fst", signs)
+                      | _ -> propegateFail()
+                             old.Add(x + ".fst", bot) 
     | LabelSndR(x) -> match (mapArith a ds qs) with
-                      | signs when signs <> Set.empty && not failedbefore -> old.Add(x + ".snd", signs)
-                      | _ -> old.Add(x, bot) 
+                      | signs when signs <> Set.empty && not (failedbefore()) -> old.Add(x + ".snd", signs)
+                      | _ -> old.Add(x + ".snd", bot) 
   | ActionAssignmentR(x, a1, a2) -> match ((mapArith a1 ds qs), (mapArith a2 ds qs)) with
-                                    | (signs1, signs2) when signs1 <> Set.empty && signs2 <> Set.empty && not failedbefore -> old.Add(x + ".fst", signs1).Add(x + ".snd", signs2)
-                                    | _ -> propegateFail
+                                    | (signs1, signs2) when signs1 <> Set.empty && signs2 <> Set.empty && not (failedbefore()) -> old.Add(x + ".fst", signs1).Add(x + ".snd", signs2)
+                                    | _ -> propegateFail()
                                            old.Add(x + ".fst", bot).Add(x + ".snd", bot)
   | ActionRead(l) -> 
     match l with
     | LabelA(x, a) -> match (mapArith a ds qs) with
-                      | signs when signs |> Set.intersect (Set.ofList [Zero; Positive]) = Set.empty && not failedbefore -> old.Add(x, signs)
-                      | _ -> propegateFail
+                      | signs when signs |> Set.intersect (Set.ofList [Zero; Positive]) = Set.empty && not (failedbefore()) -> old.Add(x, signs)
+                      | _ -> propegateFail()
                              old.Add(x, bot)
-    | LabelX(x) -> if not failedbefore then
+    | LabelX(x) -> if not (failedbefore()) then
                     old.Add(x, Set.ofList [Negative; Zero; Positive])
                    else 
                     old.Add(x, bot)
-    | LabelFstR(x) -> if not failedbefore then
+    | LabelFstR(x) -> if not (failedbefore()) then
                         old.Add(x + ".fst", Set.ofList [Negative; Zero; Positive])
                       else 
-                        old.Add(x, bot)
-    | LabelSndR(x) -> if not failedbefore then
+                        old.Add(x + ".fst", bot)
+    | LabelSndR(x) -> if not (failedbefore()) then
                         old.Add(x + ".snd", Set.ofList [Negative; Zero; Positive])
                       else 
-                        old.Add(x, bot)
+                        old.Add(x + ".snd", bot)
   | _ -> old
 
 let relation (t1: DetectionOfSigns AnalysisMapping) (t2: DetectionOfSigns AnalysisMapping) : bool =
