@@ -79,8 +79,7 @@ let killGenSetResult (edge: Edge) (rd: ReachingDefinition AnalysisAssignment) (n
   let (qs, action, qe) = edge
   let kills = killset action nodes
   let gens = genset edge
-  let result = rd.Item qs - kills + gens
-  result
+  rd.Item qs - kills + gens
 
 let killGetSetWrapper (nodes: Node List) =
   fun e rd -> killGenSetResult e rd nodes

@@ -24,16 +24,14 @@ let analyseMonotone (spec: 'T AnalysisSpecification) (pg: ProgramGraph) : 'T Ana
     List.exists (fun edge -> 
       let newVal = spec.mapping edge resultSet
       let (_, _, qe) = edge
-      let idk = not (spec.domain.relation newVal (resultSet.Item qe))
-      idk
+      not (spec.domain.relation newVal (resultSet.Item qe))
     ) edges
 
   let updateEdges (spec: 'T AnalysisSpecification) (edges: Edge List) (resultSet: 'T AnalysisAssignment) : 'T AnalysisAssignment =
     List.foldBack (fun (qs, action, qe) acc -> 
       let newValue = spec.mapping (qs, action, qe) acc
       let oldValue = acc.Item qe
-      let resultValue = spec.domain.join oldValue newValue
-      acc.Add(qe, resultValue)
+      acc.Add(qe, spec.domain.join oldValue newValue)
     ) edges resultSet
 
   let (qs, qe, edges) = pg;
