@@ -78,19 +78,19 @@ let variables (pg: ProgramGraph): string Set =
   let variablesSingle (action: Action): Set<string> = 
     let rec variablesA (a: A) = 
       match a with
-      | ArithmeticX(x)
-      | ArithmeticFstR(x)
-      | ArithmeticSndR(x) -> Set.singleton x
-      | ArithmeticA(x, a2) -> Set.union (Set.singleton x) (variablesA a2)
-      | ROp(a1, _, a2) -> Set.union (variablesA a1) (variablesA a2)
+      | ArithmeticX(x) -> Set.singleton x
+      | ArithmeticFstR(x) -> Set.singleton (x + ".fst")
+      | ArithmeticSndR(x) -> Set.singleton (x + ".snd")
+      | ArithmeticA(x, a2) -> (Set.singleton x) + (variablesA a2)
+      | ROp(a1, _, a2) -> (variablesA a1) + (variablesA a2)
       | _ -> Set.empty
 
     let variablesL (l: L) = 
       match l with
-      | LabelX(x)
-      | LabelFstR(x)
-      | LabelSndR(x) -> Set.singleton x
-      | LabelA(x, a) -> Set.union (Set.singleton x) (variablesA a)
+      | LabelX(x) -> Set.singleton x
+      | LabelFstR(x) -> Set.singleton (x + ".fst")
+      | LabelSndR(x) -> Set.singleton (x + ".snd")
+      | LabelA(x, a) -> (Set.singleton x) + (variablesA a)
 
     let variablesB (b: B) =
       match b with
@@ -99,10 +99,10 @@ let variables (pg: ProgramGraph): string Set =
 
     match action with
     | ActionDeclarationX(x)
-    | ActionDeclarationA(x, _)
-    | ActionDeclarationR(x) -> Set.singleton x
-    | ActionAssignmentL(l, a) -> Set.union (variablesL l) (variablesA a)
-    | ActionAssignmentR(x, a1, a2) -> Set.singleton x + variablesA a1 + variablesA a2
+    | ActionDeclarationA(x, _) -> Set.singleton x
+    | ActionDeclarationR(x) -> Set.ofList [x + ".fst"; x + ".snd"]
+    | ActionAssignmentL(l, a) -> (variablesL l) + (variablesA a)
+    | ActionAssignmentR(x, a1, a2) -> Set.ofList [x + ".fst"; x + ".snd"] + variablesA a1 + variablesA a2
     | ActionRead(l) -> variablesL l
     | ActionWrite(a) -> variablesA a
     | ActionBool(b) -> variablesB b
@@ -115,9 +115,24 @@ let variables (pg: ProgramGraph): string Set =
   let (_, _, edges) = pg;
   variablesRec edges Set.empty
 
+let variableInAction (action: Action) : string Set option =
+  match action with
+  | ActionDeclarationX(x)
+  | ActionDeclarationA(x, _) -> Some (Set.singleton x)
+  | ActionDeclarationR(x)
+  | ActionAssignmentR(x, _, _) -> Some (Set.ofList [x + ".fst"; x + ".snd"])
+  | ActionRead(x)
+  | ActionAssignmentL(x, _) -> match x with
+                                | LabelX(x)
+                                | LabelA(x, _) -> Some (Set.singleton x)
+                                | LabelFstR(x) -> Some (Set.singleton (x + ".fst"))
+                                | LabelSndR(x) -> Some (Set.singleton (x + ".snd"))
+  | _ -> None
+
 let nodes (pg: ProgramGraph): Node List = 
   let (qs, qe, _) = pg;
   [qs .. qe]
+
 
 let convertToProgramGraph (p: Program) =
     let rec convertDeclaration ((qs, d): (int * Declaration)) =
@@ -142,12 +157,12 @@ let convertToProgramGraph (p: Program) =
         | AssignmentL(l, a) -> ([Edge(qs, ActionAssignmentL(l, a), qs + 1)], qs + 1) 
         | AssignmentR(n, a1, a2) -> ([Edge(qs, ActionAssignmentR(n, a1, a2), qs + 1)], qs + 1)
         | IfStatement(b, s) -> match convertStatements (qs+1, s) with
-                                | (edges, n) -> (edges@ [Edge(qs, ActionBool(Not(b)), n); Edge(qs, ActionBool(b), qs + 1)], n+1)
+                                | (edges, n) -> (edges@ [Edge(qs, ActionBool(Not(b)), n); Edge(qs, ActionBool(b), qs + 1)], n)
         | IfElseStatement(b, s1, s2) -> match convertStatements (qs+1, s1) with
                                         | (edges1, n1) -> match convertStatements (n1, s2) with
                                                             | (edges2, n2) -> (fixIfElse edges1 n1 n2 @ edges2 @ [Edge(qs, ActionBool(b), qs+1); Edge(qs, ActionBool(Not(b)), n1)], n2)
         | WhileStatement (b, s) -> match convertStatements (qs+1, s) with
-                                    | (edges, n) -> (edges @ [Edge(qs, ActionBool(Not(b)), n); Edge(qs, ActionBool(b), qs + 1)], n+1)
+                                    | (edges, n) -> (edges @ [Edge(qs, ActionBool(Not(b)), n); Edge(qs, ActionBool(b), qs + 1)], n)
         | Read(l) -> ([Edge(qs, ActionRead(l), qs+1)], qs + 1)
         | Write(a) -> ([Edge(qs, ActionWrite(a), qs+1)], qs + 1)
         | Statements (s1, s2) -> 
@@ -159,4 +174,4 @@ let convertToProgramGraph (p: Program) =
     match p with
         | dec, stm -> match convertDeclaration (0, dec) with
                         | (edges1, cnt) -> match convertStatements (cnt, stm) with
-                                           | (edges2, qe) -> ProgramGraph(0, qe - 1, edges1 @ edges2)
+                                           | (edges2, qe) -> ProgramGraph(0, qe, edges1 @ edges2)
