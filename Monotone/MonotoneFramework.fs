@@ -2,21 +2,22 @@
 
 open ProgramGraph
 
-type AnalysisAssignment<'T when 'T : comparison> = Map<Node, 'T Set>
+type AnalysisMapping<'T when 'T : comparison> = Map<string, 'T Set>
+and AnalysisAssignment<'T when 'T : comparison> = Map<Node, 'T AnalysisMapping>
 
 // The pointed semi-lattice
 type AnalysisDomain<'T when 'T : comparison> = 
   {
-    relation: 'T Set -> 'T Set -> bool
-    join: 'T Set -> 'T Set -> 'T Set
-    bottom: 'T Set
+    relation: 'T AnalysisMapping -> 'T AnalysisMapping -> bool
+    join: 'T AnalysisMapping -> 'T AnalysisMapping -> 'T AnalysisMapping
+    bottom: 'T AnalysisMapping
   }
 
 type AnalysisSpecification<'T when 'T : comparison> = 
   {
     domain: 'T AnalysisDomain
-    mapping: Edge -> 'T AnalysisAssignment -> 'T Set
-    initial: 'T Set
+    mapping: Edge -> 'T AnalysisAssignment -> 'T AnalysisMapping
+    initial: 'T AnalysisMapping
   }
 
 let analyseMonotone (spec: 'T AnalysisSpecification) (pg: ProgramGraph) : 'T AnalysisAssignment =

@@ -6,28 +6,28 @@ open AbstractSyntaxTree
 
 [<EntryPoint>]
 let main argv =
-    let x ="
-    {
-       int[5] a;
-       int x;
+    //let x ="
+    //{
+    //   int[5] a;
+    //   int x;
         
-       x := 4;
-       a[x] := 2;
-       if (a[3] == 12) {
-           x := a[x];
-       }
-    }"
+    //   x := 4;
+    //   a[x] := 2;
+    //   if (a[3] == 12) {
+    //       x := a[x];
+    //   }
+    //}"
 
-    let tokens = parseString x
-    let graph = convertToProgramGraph tokens
+    //let tokens = parseString x
+    //let graph = convertToProgramGraph tokens
 
-    printfn "%A" graph
+    //printfn "%A" graph
 
-    let idk = ReachingDefinitions.analyse graph
+    //let idk = ReachingDefinitions.analyse graph
 
-    printfn "%A" idk
+    //printfn "%A" idk
 
-    printfn "set breakpoint to see ast value"
+    //printfn "set breakpoint to see ast value"
 
 
 
@@ -45,7 +45,11 @@ let main argv =
         }
     }"
 
-    printf "%A" (ReachingDefinitions.analyse (convertToProgramGraph (parseString test_2_3)))
+    let graph2 = convertToProgramGraph (parseString test_2_3)
+
+    printfn "%A" graph2
+
+    printf "%A" (ReachingDefinitions.analyse graph2)
 
     // Exit code
     0
