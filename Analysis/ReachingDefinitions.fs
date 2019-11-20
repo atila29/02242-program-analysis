@@ -3,6 +3,7 @@ module Analyses.ReachingDefinitions
 open ProgramGraph
 open MonotoneFramework
 open AbstractSyntaxTree
+open Worklist.Interface
 
 type ReachingDefinition = Node option * Node
 
@@ -82,7 +83,7 @@ let initial (xs: string Set) (qs: Node) : ReachingDefinition AnalysisMapping =
   xs |> Set.toSeq |> Seq.map (fun x -> (x, Set.singleton (ReachingDefinition(None, qs)))) |> Map.ofSeq
 
 
-let analyse (pg: ProgramGraph) = 
+let analyse (pg: ProgramGraph) (worklist: Node IWorklist) = 
   let (qs, _, _) = pg
   let domain : ReachingDefinition AnalysisDomain = 
     {
@@ -98,4 +99,4 @@ let analyse (pg: ProgramGraph) =
       initial = initial (ProgramGraph.variables pg) qs
     }
 
-  analyseMonotone spec pg
+  analyseMonotone spec pg worklist

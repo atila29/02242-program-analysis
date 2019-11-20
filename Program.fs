@@ -1,8 +1,7 @@
-﻿// Learn more about F# at http://fsharp.org
-open ParsingUtil
+﻿open ParsingUtil
 open ProgramGraph
 open Analyses
-open AbstractSyntaxTree
+open Worklist.Implementation
 
 [<EntryPoint>]
 let main argv =
@@ -47,9 +46,11 @@ let main argv =
 
     let graph2 = convertToProgramGraph (parseString test_2_3)
 
-    printfn "%A" graph2
+    printfn "ProgramGraph:\n%A" graph2
 
-    printf "%A" (ReachingDefinitions.analyse graph2)
+    let worklist = new WorklistQueue<Node>()
+
+    printf "AnalysisAssigenment:\n%A" (ReachingDefinitions.analyse graph2 worklist)
 
     // Exit code
     0
