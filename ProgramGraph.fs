@@ -74,7 +74,7 @@ and Edge = Node * Action * Node
 and Node = int
 
 
-let variables (pg: ProgramGraph): Set<string> =
+let variables (pg: ProgramGraph): string Set =
   let variablesSingle (action: Action): Set<string> = 
     let rec variablesA (a: A) = 
       match a with
@@ -115,6 +115,9 @@ let variables (pg: ProgramGraph): Set<string> =
   let (_, _, edges) = pg;
   variablesRec edges Set.empty
 
+let nodes (pg: ProgramGraph): Node List = 
+  let (qs, qe, _) = pg;
+  [qs .. qe]
 
 let convertToProgramGraph (p: Program) =
     let rec convertDeclaration ((qs, d): (int * Declaration)) =

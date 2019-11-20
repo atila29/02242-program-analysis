@@ -1,12 +1,14 @@
 module Analyses.ReachingDefinitions
 
 open ProgramGraph
+open MonotoneFramework
 open AbstractSyntaxTree
-
 
 type ReachingDefinition = string * Node option * Node
 
-let cartesianNullable (x: string) (q: Node List): Set<ReachingDefinition> =
+
+
+let cartesianNullable (x: string) (q: Node List): ReachingDefinition Set =
   let l = None :: (q |> List.map Some)
 
   let rec iterateEndingElem (x: string) (startingItem: Option<Node>) (endingItems: Node List): Set<ReachingDefinition> = 
@@ -22,27 +24,25 @@ let cartesianNullable (x: string) (q: Node List): Set<ReachingDefinition> =
   
   iterateStartingElem x l q
 
-let init (xs: Set<string>) (qs: Node): Set<ReachingDefinition> =
-  Set.foldBack (fun x acc -> Set.add (ReachingDefinition(x, None, qs)) acc) xs Set.empty
 
-
-let killset (action: Action) (bigQ: Node List): Set<ReachingDefinition> =
+let killset (action: Action) (nodes: Node List) : ReachingDefinition Set =
   match action with
   | ActionDeclarationX(x)
   | ActionDeclarationA(x, _)
-  | ActionDeclarationR(x) -> cartesianNullable x bigQ
+  | ActionDeclarationR(x)
+  | ActionAssignmentR(x, _, _) -> cartesianNullable x nodes
   | ActionAssignmentL(l, _) -> 
     match l with
-    | LabelX(x) -> cartesianNullable x bigQ
+    | LabelX(x) -> cartesianNullable x nodes
     | _ -> Set.empty
-  | ActionAssignmentR(r, _, _) -> cartesianNullable r bigQ
   | ActionRead(a) -> 
     match a with
-    | LabelX(x) -> cartesianNullable x bigQ
+    | LabelX(x) -> cartesianNullable x nodes
     | _ -> Set.empty
   | _ -> Set.empty
 
-let genset (qs: Node) (action: Action) (qe: Node): Set<ReachingDefinition> =
+let genset (edge: Edge) : ReachingDefinition Set =
+  let (qs, action, qe) = edge
   match action with
   | ActionAssignmentL(l, _) -> 
     match l with
@@ -50,7 +50,10 @@ let genset (qs: Node) (action: Action) (qe: Node): Set<ReachingDefinition> =
     | LabelA(x, _)
     | LabelFstR(x)
     | LabelSndR(x) -> Set.singleton (ReachingDefinition(x, Some(qs), qe))
-  | ActionAssignmentR(r, _, _) -> Set.singleton (ReachingDefinition(r, Some(qs), qe))
+  | ActionDeclarationX(x)
+  | ActionDeclarationA(x, _)
+  | ActionDeclarationR(x)
+  | ActionAssignmentR(x, _, _) -> Set.singleton (ReachingDefinition(x, Some(qs), qe))
   | ActionRead(l) -> 
     match l with
     | LabelX(x)
@@ -58,32 +61,48 @@ let genset (qs: Node) (action: Action) (qe: Node): Set<ReachingDefinition> =
     | _ -> Set.empty
   | _ -> Set.empty
 
+let variableInAction (action: Action) : string option =
+  match action with
+  | ActionDeclarationX(x)
+  | ActionDeclarationA(x, _)
+  | ActionDeclarationR(x)
+  | ActionAssignmentR(x, _, _) -> Some x
+  | ActionRead(x)
+  | ActionAssignmentL(x, _) -> match x with
+                                | LabelX(x)
+                                | LabelA(x, _)
+                                | LabelFstR(x)
+                                | LabelSndR(x) -> Some x
+  | _ -> None
 
-
-let updateKillGenSet (edge: Edge) (bigQ: Node List) (rd: Map<Node, Set<ReachingDefinition>>): Map<Node, Set<ReachingDefinition>> =
+let killGenSetResult (edge: Edge) (rd: ReachingDefinition AnalysisAssignment) (nodes: Node List): ReachingDefinition Set = 
   let (qs, action, qe) = edge
-  let kills = killset action bigQ
-  let gens = genset qs action qe
+  let kills = killset action nodes
+  let gens = genset edge
+  rd.Item qs - kills + gens
 
-  let t = rd.Item qs
-  let e = rd.Item qe
+let killGetSetWrapper (nodes: Node List) =
+  fun e rd -> killGenSetResult e rd nodes
 
-  let newSet = rd.Item qe + (rd.Item qs - kills) + gens
-  rd.Add(qe, newSet)
+
+let initial (xs: string Set) (qs: Node) : ReachingDefinition Set =
+  Set.map (fun x -> ReachingDefinition(x, None, qs)) xs
 
 
 let analyse (pg: ProgramGraph) = 
-  let (startnode, endnode, edges) = pg;
-  let nodeList = [startnode .. endnode];
-  let rd =  ([startnode + 1 .. endnode] |> List.map (fun i -> i, Set.empty<ReachingDefinition>) |> Map.ofList)
-  
-  // Todo: Need to find a better way to add this default element...
-  let rd = rd.Add(startnode, init (variables pg) startnode)
+  let (qs, _, _) = pg
+  let domain : ReachingDefinition AnalysisDomain = 
+    {
+      relation = Set.isSubset
+      join = Set.union
+      bottom = Set.empty
+    }
 
-  // Algorithm here
-  let rec loop (edges: Edge List) (rd: Map<Node, Set<ReachingDefinition>>) =
-    match edges with
-      | head :: tail -> loop tail (updateKillGenSet head nodeList rd)
-      | [] -> rd
+  let spec : ReachingDefinition AnalysisSpecification = 
+    {
+      domain = domain
+      mapping = killGetSetWrapper (ProgramGraph.nodes pg)
+      initial = initial (ProgramGraph.variables pg) qs
+    }
 
-  loop edges rd
+  analyseMonotone spec pg

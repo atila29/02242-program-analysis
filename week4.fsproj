@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.2</TargetFramework>
@@ -13,13 +13,16 @@
     </FsLex>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AbstractSyntaxTree.fs" />
+    <Compile Include="AbstractSyntaxTree.fs" />  
     <None Include="Parser.fsy" />
     <None Include="Lexer.fsl" />
     <Compile Include="Parser.fs" />
     <Compile Include="Lexer.fs" />
     <Compile Include="ParsingUtil.fs" />
     <Compile Include="ProgramGraph.fs" />
+    <Compile Include="Monotone/MonotoneFramework.fs" />
+    <Compile Include="Worklist/IWorklist.fs" />
+    <Compile Include="Worklist/Worklist.fs" />
     <Compile Include="Analysis/ReachingDefinitions.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

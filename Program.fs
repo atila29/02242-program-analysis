@@ -47,10 +47,5 @@ let main argv =
 
     printf "%A" (ReachingDefinitions.analyse (convertToProgramGraph (parseString test_2_3)))
 
-
-    // let labelTest = ActionBool(Not(BoolValue(true)))
-
-    // printfn labelTest
-
     // Exit code
     0
