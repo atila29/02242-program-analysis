@@ -41,6 +41,7 @@ and A =
 | ArithmeticFstR of string
 | ArithmeticSndR of string
 | ROp of A * ArithmeticOperator * A
+| ArithmeticNeg of A
 with override this.ToString() =
       match this with
       | ArithmeticN(n) -> string n
@@ -49,6 +50,7 @@ with override this.ToString() =
       | ArithmeticFstR(x) -> x + ".fst"
       | ArithmeticSndR(x) -> x + ".snd"
       | ROp(a1, op, a2) -> string a1 + " " + string op + " " + string a2
+      | ArithmeticNeg(a) -> "-" + string a
 
 and B =
 | BoolValue of bool

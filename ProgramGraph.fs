@@ -2,6 +2,7 @@ module ProgramGraph
 
 open AbstractSyntaxTree
 
+[<StructuredFormatDisplay("{AsString}")>]
 type Action = 
 | ActionDeclarationX of string
 | ActionDeclarationA of string * int
@@ -11,8 +12,8 @@ type Action =
 | ActionRead of L
 | ActionWrite of A
 | ActionBool of B
-with override this.ToString() = 
-      match this with
+  override l.ToString() = 
+      match l with
       | ActionDeclarationX(x) -> "int " + x
       | ActionDeclarationA(x, n) -> "int[" + string n + "] " + x
       | ActionDeclarationR(x) -> "{int fst; int snd} " + x
@@ -21,6 +22,10 @@ with override this.ToString() =
       | ActionRead(l) -> "read " + string l
       | ActionWrite(a) -> "write " + string a
       | ActionBool(b) -> string b
+
+      member l.AsString = l.ToString()
+
+
 
 type ProgramGraph = Node * Node * Edge List
 and Edge = Node * Action * Node
