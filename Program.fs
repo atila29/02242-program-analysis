@@ -4,53 +4,43 @@ open Analyses
 open Worklist.Implementation
 
 [<EntryPoint>]
-let main argv =
-    //let x ="
-    //{
-    //   int[5] a;
-    //   int x;
-        
-    //   x := 4;
-    //   a[x] := 2;
-    //   if (a[3] == 12) {
-    //       x := a[x];
-    //   }
-    //}"
-
-    //let tokens = parseString x
-    //let graph = convertToProgramGraph tokens
-
-    //printfn "%A" graph
-
-    //let idk = ReachingDefinitions.analyse graph
-
-    //printfn "%A" idk
-
-    //printfn "set breakpoint to see ast value"
-
-
-
-    let test_2_3 = "
+let main _ =
+    let input = "
     {
         {int fst; int snd} R;
         int x;
+        int[5] A;
         x := 2*2;
-        R := (1, 10);
+        R := (1, -10);
 
         if (x == 4)
         {
             R.fst := x;
             x := R.snd;
         }
+        else {
+          R.snd := 15;
+        }
+        x := 5;
     }"
 
-    let graph2 = convertToProgramGraph (parseString test_2_3)
 
-    printfn "ProgramGraph:\n%A" graph2
+    let graph = convertToProgramGraph (parseString input)
+    
+    let (qs, qe, edges) = graph;
+    printfn "ProgramGraph:"
+    printfn "qs: %d, qe: %d" qs qe
+    edges |> Seq.iter (printfn "%A")
+
+    printfn ""
 
     let worklist = new WorklistQueue<Node>()
+    let result = DetectionOfSigns.analyse graph worklist
 
-    printf "AnalysisAssigenment:\n%A" (ReachingDefinitions.analyse graph2 worklist)
+    printfn "AnalysisAssigenment:"
+    result |> Seq.iter (fun x ->  printf "%d - " x.Key 
+                                  Seq.iter (fun x' -> printf "%A " x') x.Value
+                                  printfn "")
 
     // Exit code
     0

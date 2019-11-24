@@ -70,6 +70,7 @@ Dec:
   | ITYP LSP INT RSP NAME SEMI                  { DeclarationA($5, $3) }        // int[5] x;
   | LCP ITYP FST SEMI ITYP SND RCP NAME SEMI    { DeclarationR($8) }
   | Dec Dec                                     { DeclarationD($1, $2) }
+  |                                             { DeclarationEmpty }
 
 L:
     NAME                                        { LabelX($1) }
@@ -84,6 +85,7 @@ A:
   | NAME DOT FST                                { ArithmeticFstR($1) }
   | NAME DOT SND                                { ArithmeticSndR($1) }
   | A ArithmeticOperator A                      { ROp($1, $2, $3) }
+  | MINUS A                                     { ArithmeticNeg($2) }
 
 B:
     BOOL                                        { BoolValue $1 }
