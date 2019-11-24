@@ -83,6 +83,9 @@ let powerset (s1: Sign Set) (s2: Sign Set) (op: ArithmeticOperator) : Sign Set =
       ) s2 acc
     ) s1 Set.empty
 
+let negateArith (s: Sign Set) : Sign Set = 
+  Set.foldBack (fun e acc -> acc + times Negative e) s Set.empty
+
 let rec mapArith (arith: A) (ds: DetectionOfSigns AnalysisAssignment) (qs: Node) =
   let getResult (x: string) (ds: DetectionOfSigns AnalysisAssignment) =
     ds.Item qs |> Map.find x
@@ -96,6 +99,7 @@ let rec mapArith (arith: A) (ds: DetectionOfSigns AnalysisAssignment) (qs: Node)
                           | set when set |> Set.intersect (Set.ofList [Zero; Positive]) = Set.empty -> Set.empty
                           | _ -> getResult x ds
   | ROp(a1, op, a2) -> powerset (mapArith a1 ds qs) (mapArith a2 ds qs) op
+  | ArithmeticNeg(a) -> negateArith (mapArith a ds qs)
 
 let bot: Sign Set = Set.empty
 

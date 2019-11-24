@@ -42,6 +42,7 @@ type Action =
             | ArithmeticFstR(n) -> n + ".fst"
             | ArithmeticSndR(n) -> n + ".snd"
             | ROp (a1, aOp, a2) -> convertA a1 + convertArithOp aOp + convertA a2
+            | ArithmeticNeg(a) -> "-" + convertA a
 
         let convertL (label:L) =
             match label with

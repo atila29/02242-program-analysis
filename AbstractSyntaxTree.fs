@@ -25,6 +25,7 @@ and A =
 | ArithmeticFstR of string
 | ArithmeticSndR of string
 | ROp of A * ArithmeticOperator * A
+| ArithmeticNeg of A
 
 and B =
 | BoolValue of bool

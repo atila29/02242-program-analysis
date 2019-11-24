@@ -31,23 +31,35 @@ let main argv =
 
 
 
-    let test_2_3 = "
-    {
-        {int fst; int snd} R;
-        int x;
-        int[5] A;
-        x := 2*2;
-        R := (1, -10);
-        A[-1] := 5;
+    //let test_2_3 = "
+    //{
+    //    {int fst; int snd} R;
+    //    int x;
+    //    int[5] A;
+    //    x := 2*2;
+    //    R := (1, -10);
+    //    A[-1] := 5;
 
-        if (x == 4)
-        {
-            R.fst := x;
-            x := R.snd;
-        }
+    //    if (x == 4)
+    //    {
+    //        R.fst := x;
+    //        x := R.snd;
+    //    }
+    //}"
+
+
+    let negative_test = "
+    {
+      int x;
+      x := 2-5;
     }"
 
-    let graph2 = convertToProgramGraph (parseString test_2_3)
+    //let lexbuf = LexBuffer<_>.FromString text
+    //Main token lexbuf
+
+    
+
+    let graph2 = convertToProgramGraph (parseString negative_test)
 
     printfn "ProgramGraph:\n%A" graph2
 
