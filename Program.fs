@@ -47,13 +47,13 @@ let main argv =
     //    }
     //}"
 
-
     let negative_test = "
     {
       int x;
-      x := 2-5;
-    }"
-
+      x := x-1+2*2-5/5-x;
+      x := -x;
+    }"//x-1+4-1-x // 4
+    // ROp(2, Multiply, ROp(2, Minus 5))
     //let lexbuf = LexBuffer<_>.FromString text
     //Main token lexbuf
 
