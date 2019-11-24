@@ -105,12 +105,16 @@ let bot: Sign Set = Set.empty
 
 // While this is not entirely a functional approach
 // it just makes propegating an error that much easier
-// without having to raise and handle exceptions
 let mutable globalFail = false;
 let failedbefore(): bool =
   globalFail
-let propegateFail(): unit =
+let propegateFail (dict: DetectionOfSigns AnalysisMapping): DetectionOfSigns AnalysisMapping =
   globalFail <- true
+  let mutable newDict = dict;
+  for entry in newDict do
+    newDict <- newDict.Add(entry.Key, bot)
+  newDict
+    
 
 let mapping (edge: Edge) (ds: DetectionOfSigns AnalysisAssignment): DetectionOfSigns AnalysisMapping =
   let (qs, action, qe) = edge
@@ -123,41 +127,36 @@ let mapping (edge: Edge) (ds: DetectionOfSigns AnalysisAssignment): DetectionOfS
     match l with
     | LabelX(x) ->  match (mapArith a ds qs) with
                     | signs when signs <> Set.empty && not (failedbefore()) -> old.Add(x, signs)
-                    | _ -> propegateFail()
-                           old.Add(x, bot)
+                    | _ -> propegateFail old
     | LabelA(x, a') -> match ((mapArith a' ds qs), (mapArith a ds qs)) with  
                         |(aIndex, signs) when aIndex |> Set.intersect (Set.ofList [Zero; Positive]) <> Set.empty && signs <> Set.empty && not (failedbefore()) -> old.Add(x, signs)
-                        | _ ->  propegateFail()
-                                old.Add(x, bot)
+                        | _ ->  propegateFail old
     | LabelFstR(x) -> match (mapArith a ds qs) with
                       | signs when signs <> Set.empty && not (failedbefore()) -> old.Add(x + ".fst", signs)
-                      | _ -> propegateFail()
-                             old.Add(x + ".fst", bot) 
+                      | _ -> propegateFail old
     | LabelSndR(x) -> match (mapArith a ds qs) with
                       | signs when signs <> Set.empty && not (failedbefore()) -> old.Add(x + ".snd", signs)
-                      | _ -> old.Add(x + ".snd", bot) 
+                      | _ -> propegateFail old
   | ActionAssignmentR(x, a1, a2) -> match ((mapArith a1 ds qs), (mapArith a2 ds qs)) with
                                     | (signs1, signs2) when signs1 <> Set.empty && signs2 <> Set.empty && not (failedbefore()) -> old.Add(x + ".fst", signs1).Add(x + ".snd", signs2)
-                                    | _ -> propegateFail()
-                                           old.Add(x + ".fst", bot).Add(x + ".snd", bot)
+                                    | _ -> propegateFail old
   | ActionRead(l) -> 
     match l with
     | LabelA(x, a) -> match (mapArith a ds qs) with
                       | signs when signs |> Set.intersect (Set.ofList [Zero; Positive]) = Set.empty && not (failedbefore()) -> old.Add(x, signs)
-                      | _ -> propegateFail()
-                             old.Add(x, bot)
+                      | _ -> propegateFail old
     | LabelX(x) -> if not (failedbefore()) then
                     old.Add(x, Set.ofList [Negative; Zero; Positive])
                    else 
-                    old.Add(x, bot)
+                    propegateFail old
     | LabelFstR(x) -> if not (failedbefore()) then
                         old.Add(x + ".fst", Set.ofList [Negative; Zero; Positive])
                       else 
-                        old.Add(x + ".fst", bot)
+                        propegateFail old
     | LabelSndR(x) -> if not (failedbefore()) then
                         old.Add(x + ".snd", Set.ofList [Negative; Zero; Positive])
                       else 
-                        old.Add(x + ".snd", bot)
+                        propegateFail old
   | _ -> old
 
 let relation (t1: DetectionOfSigns AnalysisMapping) (t2: DetectionOfSigns AnalysisMapping) : bool =
@@ -171,7 +170,6 @@ let bottom (xs: string Set) : DetectionOfSigns AnalysisMapping =
   xs |> Set.toSeq |> Seq.map (fun x -> (x, Set.empty)) |> Map.ofSeq
 
 let analyse (pg: ProgramGraph) = 
-  let (qs, _, _) = pg
   let domain : DetectionOfSigns AnalysisDomain = 
     {
       relation = relation
