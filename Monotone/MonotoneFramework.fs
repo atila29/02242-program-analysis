@@ -1,44 +1,50 @@
 ﻿module MonotoneFramework
 
 open ProgramGraph
+open Worklist.Interface
 
-type AnalysisAssignment<'T when 'T : comparison> = Map<Node, 'T Set>
+type AnalysisMapping<'T when 'T : comparison> = Map<string, 'T Set>
+and AnalysisAssignment<'T when 'T : comparison> = Map<Node, 'T AnalysisMapping>
 
 // The pointed semi-lattice
 type AnalysisDomain<'T when 'T : comparison> = 
   {
-    relation: 'T Set -> 'T Set -> bool
-    join: 'T Set -> 'T Set -> 'T Set
-    bottom: 'T Set
+    relation: 'T AnalysisMapping -> 'T AnalysisMapping -> bool
+    join: 'T AnalysisMapping -> 'T AnalysisMapping -> 'T AnalysisMapping
+    bottom: 'T AnalysisMapping
   }
 
 type AnalysisSpecification<'T when 'T : comparison> = 
   {
     domain: 'T AnalysisDomain
-    mapping: Edge -> 'T AnalysisAssignment -> 'T Set
-    initial: 'T Set
+    mapping: Edge -> 'T AnalysisAssignment -> 'T AnalysisMapping
+    initial: 'T AnalysisMapping
   }
 
-let analyseMonotone (spec: 'T AnalysisSpecification) (pg: ProgramGraph) : 'T AnalysisAssignment =
-  let needsUpdating (spec: 'T AnalysisSpecification) (edges: Edge List) (resultSet: 'T AnalysisAssignment) : bool =
-    List.exists (fun edge -> 
-      let newVal = spec.mapping edge resultSet
-      let (_, _, qe) = edge
-      not (spec.domain.relation newVal (resultSet.Item qe))
-    ) edges
 
-  let updateEdges (spec: 'T AnalysisSpecification) (edges: Edge List) (resultSet: 'T AnalysisAssignment) : 'T AnalysisAssignment =
-    List.foldBack (fun (qs, action, qe) acc -> 
-      let newValue = spec.mapping (qs, action, qe) acc
-      let oldValue = acc.Item qe
-      acc.Add(qe, spec.domain.join oldValue newValue)
-    ) edges resultSet
+let analyseMonotone (spec: 'T AnalysisSpecification) (pg: ProgramGraph) (worklist: Node IWorklist) : 'T AnalysisAssignment =
+  let edgesWithStart (edges: Edge List) (qs: Node): Edge List =
+    List.filter (fun (q, _, _) -> q = qs) edges
 
   let (qs, qe, edges) = pg;
-  let mutable resultSet = ([qs + 1 .. qe] |> List.map (fun i -> i, spec.domain.bottom) |> Map.ofList)
+  let mutable resultSet = Map.empty
+  let mutable worklist = worklist.Empty
+
+  for node in [qs .. qe] do
+    resultSet <- resultSet.Add(node, spec.domain.bottom)
+    worklist <- worklist.Insert(node)
+
   resultSet <- resultSet.Add(qs, spec.initial)
 
-  while needsUpdating spec edges resultSet do
-    resultSet <- updateEdges spec edges resultSet
+  while not worklist.IsEmpty do
+    let (q, worklist') = worklist.Extract
+    worklist <- worklist'
+    for e in (edgesWithStart edges q) do
+      let newVal = spec.mapping e resultSet
+      let (_, _, qe') = e
+      let oldVal = resultSet.Item qe'
+      if (not (spec.domain.relation newVal oldVal)) then
+        resultSet <- resultSet.Add(qe', spec.domain.join oldVal newVal)
+        worklist <- worklist.Insert(qe')
 
   resultSet
