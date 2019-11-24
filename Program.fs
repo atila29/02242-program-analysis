@@ -34,7 +34,16 @@ let main _ =
 
     printfn ""
 
-    let worklist = new WorklistQueue<Node>()
+    let (T, rp) = ReversePostOrder.DFS graph
+    rp |> Map.iter (fun k v -> (printf "%d - %A ; " k v))
+    printfn ""
+    T |> Set.iter (printf "%A")
+    printfn ""
+
+    let worklist = new ReversePostOrder.Worklist<Node>(List.empty, Set.empty, rp) 
+
+    // let worklist = new Base.WorklistQueue<Node>()
+
     let result = DetectionOfSigns.analyse graph worklist
 
     printfn "AnalysisAssigenment:"
