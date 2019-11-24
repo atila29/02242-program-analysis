@@ -12,63 +12,20 @@ type Action =
 | ActionRead of L
 | ActionWrite of A
 | ActionBool of B
-    override l.ToString() = 
-        let convertArithOp (a: ArithmeticOperator) =
-            match a with
-            | Plus -> "+"
-            | Minus -> "-"
-            | Multiply -> "*"
-            | Divide -> "/"
+  override l.ToString() = 
+      match l with
+      | ActionDeclarationX(x) -> "int " + x
+      | ActionDeclarationA(x, n) -> "int[" + string n + "] " + x
+      | ActionDeclarationR(x) -> "{int fst; int snd} " + x
+      | ActionAssignmentL(l, a) -> string l + " := " + string a
+      | ActionAssignmentR(x, a1, a2) -> x + " := (" + string a1 + ", " + string a2 + ")"
+      | ActionRead(l) -> "read " + string l
+      | ActionWrite(a) -> "write " + string a
+      | ActionBool(b) -> string b
 
-        let convertRelOp (r: RelationalOperator) =
-            match r with
-            | LessThan -> "<"
-            | GreaterThan -> ">"
-            | LesserOrEqualTo -> "<="
-            | GreaterOrEqualTo -> ">="
-            | EqualTo -> "=="
-            | NotEqualTo -> "!="
+      member l.AsString = l.ToString()
 
-        let convertBoolOp (b: BooleanOperator) =
-            match b with
-            | AndOp -> "&"
-            | OrOp -> "|"
 
-        let rec convertA (a:A) =
-            match a with
-            | ArithmeticN(n) -> string n
-            | ArithmeticX(x) -> x
-            | ArithmeticA (n, i) -> n + "[" + convertA i + "]"
-            | ArithmeticFstR(n) -> n + ".fst"
-            | ArithmeticSndR(n) -> n + ".snd"
-            | ROp (a1, aOp, a2) -> convertA a1 + convertArithOp aOp + convertA a2
-            | ArithmeticNeg(a) -> "-" + convertA a
-
-        let convertL (label:L) =
-            match label with
-            | LabelX(x) -> x
-            | LabelA(n, a) -> n + "[" + convertA a + "]"
-            | LabelFstR(n) -> n + ".fst"
-            | LabelSndR(n) -> n + ".snd"
-
-        let rec convertB (b: B) =
-            match b with
-            | BoolValue(b) -> string b
-            | AOp(a1, rOp, a2) -> convertA a1 + convertRelOp rOp + convertA a2
-            | BOp(b1, bOp, b2) -> convertB b1 + convertBoolOp bOp + convertB b2
-            | Not(b) -> "!" + convertB b
-    
-        match l with
-                | ActionDeclarationX(s) -> "int " + s
-                | ActionDeclarationA(name, index) ->  "int[" + string index + "] " + name
-                | ActionDeclarationR(name) -> "{int fst; int snd} " + name
-                | ActionAssignmentL(label, a) -> convertL label + ":=" + convertA a
-                | ActionAssignmentR(name, a1, a2) -> name + ":=(" + convertA a1 + "," + convertA a2 + ")"
-                | ActionRead(l) -> "read " + convertL l
-                | ActionWrite(a) -> "write" + convertA a
-                | ActionBool(b) -> convertB b
-
-        member l.AsString = l.ToString()
 
 type ProgramGraph = Node * Node * Edge List
 and Edge = Node * Action * Node
