@@ -135,8 +135,8 @@ let convertToProgramGraph (p: Program) =
                                            | (edges2, qe) -> ProgramGraph(0, qe, edges1 @ edges2)
 
 let printVizGraph (pg: ProgramGraph) : string =
-  let (_, _, edges) = pg
-  let init  = "digraph program_graph3 {rankdir=TL;\nnode [shape = circle]\n"
+  let (startNode, endNode, edges) = pg
+  let init  = "digraph program_graph {rankdir=TL;\nn0 [label= \"\", shape=none,height=.0,width=.0] n0 -> q_" + string startNode + ";\nnode [shape = doublecircle]; q_" + string endNode + ";\nnode [shape = circle]\n"
 
   let printEdge (edge: Edge) =
     match edge with
