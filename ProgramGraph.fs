@@ -145,3 +145,4 @@ let printVizGraph (pg: ProgramGraph) : string =
   init + (edges
   |> List.map printEdge
   |> List.fold (+) "") + "}"
+  
