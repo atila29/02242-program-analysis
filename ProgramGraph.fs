@@ -133,3 +133,15 @@ let convertToProgramGraph (p: Program) =
         | dec, stm -> match convertDeclaration (0, dec) with
                         | (edges1, cnt) -> match convertStatements (cnt, stm) with
                                            | (edges2, qe) -> ProgramGraph(0, qe, edges1 @ edges2)
+
+let printVizGraph (pg: ProgramGraph) : string =
+  let (_, _, edges) = pg
+  let init  = "digraph program_graph3 {rankdir=TL;\nnode [shape = circle]\n"
+
+  let printEdge (edge: Edge) =
+    match edge with
+    | (qs, action, qe) -> "q_" + string qs + " -> q_" + string qe + " [label = \"" + string action + ";\"]\n"
+
+  init + (edges
+  |> List.map printEdge
+  |> List.fold (+) "") + "}"
