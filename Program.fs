@@ -32,6 +32,8 @@ let main _ =
     printfn "qs: %d, qe: %d" qs qe
     edges |> Seq.iter (printfn "%A")
 
+    printf "%s" (printVizGraph graph)
+
     printfn ""
 
     let (T, rp) = ReversePostOrder.DFS graph
