@@ -1,6 +1,7 @@
 module ProgramGraph
 
 open AbstractSyntaxTree
+open System.Text
 
 [<StructuredFormatDisplay("{AsString}")>]
 type Action = 
@@ -136,13 +137,15 @@ let convertToProgramGraph (p: Program) =
 
 let printVizGraph (pg: ProgramGraph) : string =
   let (startNode, endNode, edges) = pg
-  let init  = "digraph program_graph {rankdir=TL;\nn0 [label= \"\", shape=none,height=.0,width=.0] n0 -> q_" + string startNode + ";\nnode [shape = doublecircle]; q_" + string endNode + ";\nnode [shape = circle]\n"
+  let init  = StringBuilder("digraph program_graph {rankdir=TL;\nn0 [label= \"\", shape=none,height=.0,width=.0] n0 -> q_" + string startNode + ";\nnode [shape = doublecircle]; q_" + string endNode + ";\nnode [shape = circle]\n")
 
   let printEdge (edge: Edge) =
     match edge with
     | (qs, action, qe) -> "q_" + string qs + " -> q_" + string qe + " [label = \"" + string action + ";\"]\n"
 
-  init + (edges
-  |> List.map printEdge
-  |> List.fold (+) "") + "}"
+  let result = edges
+                |> List.map printEdge
+                |> Seq.fold(fun (sb: StringBuilder) s -> sb.Append(s)) init
+
+  result.Append("}").ToString()
   
