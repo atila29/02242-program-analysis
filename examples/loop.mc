@@ -8,7 +8,7 @@
 
     while(x > R.snd)
     {
-        R.snd = R.snd + 1;
+        R.snd := R.snd + 1;
         x := x - 1;
     }
 }

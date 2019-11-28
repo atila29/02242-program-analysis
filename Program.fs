@@ -10,6 +10,7 @@ open Example.Runner
 let main _ =
 
   let examples = [
+    "examples/test2.mc";
     "examples/simple.mc"; 
     "examples/if.mc"; 
     "examples/ifelse.mc" ; 
