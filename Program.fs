@@ -18,7 +18,11 @@ let main _ =
     "examples/nested.mc"; 
     "examples/nestedloops.mc"]
 
-  examples |> List.iter (run ReachingDefinitions.analyse (new Base.WorklistQueue<Node>()))
+  examples |> Seq.iter (run ReachingDefinitions.analyse (new Base.WorklistQueue<Node>()))
+  examples |> Seq.iter (run ReachingDefinitions.analyse (new Base.WorklistStack<Node>()))
+
+  examples |> Seq.iter (run DetectionOfSigns.analyse (new Base.WorklistQueue<Node>()))
+  examples |> Seq.iter (run DetectionOfSigns.analyse (new Base.WorklistStack<Node>()))
 
 
   0

@@ -16,6 +16,6 @@
                 x := x - 1;
             }
         }
-        R.snd = R.snd + 1;
+        R.snd := R.snd + 1;
     }
 }
