@@ -23,6 +23,7 @@ type AnalysisSpecification<'T when 'T : comparison> =
 
 
 let analyseMonotone (spec: 'T AnalysisSpecification) (pg: ProgramGraph) (worklist: Node IWorklist) : 'T AnalysisAssignment =
+  let mutable step = 0
   let edgesWithStart (edges: Edge List) (qs: Node): Edge List =
     List.filter (fun (q, _, _) -> q = qs) edges
 
@@ -37,6 +38,7 @@ let analyseMonotone (spec: 'T AnalysisSpecification) (pg: ProgramGraph) (worklis
   resultSet <- resultSet.Add(qs, spec.initial)
 
   while not worklist.IsEmpty do
+    step <- step + 1
     let (q, worklist') = worklist.Extract
     worklist <- worklist'
     for e in (edgesWithStart edges q) do
@@ -46,5 +48,5 @@ let analyseMonotone (spec: 'T AnalysisSpecification) (pg: ProgramGraph) (worklis
       if (not (spec.domain.relation newVal oldVal)) then
         resultSet <- resultSet.Add(qe', spec.domain.join oldVal newVal)
         worklist <- worklist.Insert(qe')
-
+  printf "steps: %d\n" step
   resultSet

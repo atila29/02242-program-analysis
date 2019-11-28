@@ -21,3 +21,7 @@ let parseFromFile filename =
   if File.Exists(filename)    
   then parseString(File.ReadAllText(filename))
   else invalidArg "ParserUtil" "File not found"
+
+
+                        
+
