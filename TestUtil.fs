@@ -19,8 +19,12 @@ let run (anaylysis: ProgramGraph -> IWorklist<Node> -> AnalysisAssignment<'T>) w
   let result = anaylysis graph worklist
   printfn "AnalysisAssigenment:"
   result |> Seq.iter (fun x ->  printf "%d - " x.Key 
-                                Seq.iter (fun x' -> printf "%A " x') x.Value
-                                printfn "")
+                                Seq.iter (fun x' -> 
+                                                let (key, value) = ``|KeyValue|`` x'
+                                                printf "%s [" key
+                                                value |> Seq.iter (fun x'' -> printf "%A; " x'')
+                                         ) x.Value
+                                printfn "]")
 
                                         
 

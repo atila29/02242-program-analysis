@@ -18,10 +18,14 @@ let main _ =
     "examples/nested.mc"; 
     "examples/nestedloops.mc"]
 
+  printfn "RD WITH FIFO"
   examples |> Seq.iter (run ReachingDefinitions.analyse (new Base.WorklistQueue<Node>()))
+  printfn "RD WITH LIFO"
   examples |> Seq.iter (run ReachingDefinitions.analyse (new Base.WorklistStack<Node>()))
 
+  printfn "DS WITH FIFO"
   examples |> Seq.iter (run DetectionOfSigns.analyse (new Base.WorklistQueue<Node>()))
+  printfn "DS WITH LIFO"
   examples |> Seq.iter (run DetectionOfSigns.analyse (new Base.WorklistStack<Node>()))
 
 

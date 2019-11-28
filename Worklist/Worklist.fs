@@ -1,4 +1,4 @@
-﻿module Worklist.Implementation.Base
+module Worklist.Implementation.Base
 
 open Worklist.Interface
 open System.Collections.Generic
