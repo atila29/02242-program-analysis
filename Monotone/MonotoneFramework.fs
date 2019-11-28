@@ -9,7 +9,7 @@ and AnalysisAssignment<'T when 'T : comparison> = Map<Node, 'T AnalysisMapping>
 // The pointed semi-lattice
 type AnalysisDomain<'T when 'T : comparison> = 
   {
-    relation: 'T AnalysisMapping -> 'T AnalysisMapping -> bool
+    ordering: 'T AnalysisMapping -> 'T AnalysisMapping -> bool
     join: 'T AnalysisMapping -> 'T AnalysisMapping -> 'T AnalysisMapping
     bottom: 'T AnalysisMapping
   }
@@ -17,7 +17,7 @@ type AnalysisDomain<'T when 'T : comparison> =
 type AnalysisSpecification<'T when 'T : comparison> = 
   {
     domain: 'T AnalysisDomain
-    mapping: Edge -> 'T AnalysisAssignment -> 'T AnalysisMapping
+    analysisfunction: Edge -> 'T AnalysisMapping -> 'T AnalysisMapping
     initial: 'T AnalysisMapping
   }
 
@@ -42,10 +42,10 @@ let analyseMonotone (spec: 'T AnalysisSpecification) (pg: ProgramGraph) (worklis
     let (q, worklist') = worklist.Extract
     worklist <- worklist'
     for e in (edgesWithStart edges q) do
-      let newVal = spec.mapping e resultSet
-      let (_, _, qe') = e
+      let (qs', _, qe') = e
+      let newVal = spec.analysisfunction e (resultSet.Item qs')
       let oldVal = resultSet.Item qe'
-      if (not (spec.domain.relation newVal oldVal)) then
+      if (not (spec.domain.ordering newVal oldVal)) then
         resultSet <- resultSet.Add(qe', spec.domain.join oldVal newVal)
         worklist <- worklist.Insert(qe')
   printf "steps: %d\n" step

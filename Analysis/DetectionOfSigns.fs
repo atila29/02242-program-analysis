@@ -86,20 +86,17 @@ let powerset (s1: Sign Set) (s2: Sign Set) (op: ArithmeticOperator) : Sign Set =
 let negateArith (s: Sign Set) : Sign Set = 
   Set.foldBack (fun e acc -> acc + times Negative e) s Set.empty
 
-let rec mapArith (arith: A) (ds: DetectionOfSigns AnalysisAssignment) (qs: Node) =
-  let getResult (x: string) (ds: DetectionOfSigns AnalysisAssignment) =
-    ds.Item qs |> Map.find x
-
+let rec mapArith (arith: A) (ds: DetectionOfSigns AnalysisMapping) =
   match arith with
   | ArithmeticN(n) -> Set.singleton (signOf n)
-  | ArithmeticX(x) -> getResult x ds
-  | ArithmeticFstR(x) -> getResult (x + ".fst") ds
-  | ArithmeticSndR(x) -> getResult (x + ".snd") ds
-  | ArithmeticA(x, a) -> match (mapArith a ds qs) with
+  | ArithmeticX(x) -> Map.find x ds
+  | ArithmeticFstR(x) -> Map.find (x + ".fst") ds
+  | ArithmeticSndR(x) -> Map.find (x + ".snd") ds
+  | ArithmeticA(x, a) -> match (mapArith a ds) with
                           | set when set |> Set.intersect (Set.ofList [Zero; Positive]) = Set.empty -> Set.empty
-                          | _ -> getResult x ds
-  | ROp(a1, op, a2) -> powerset (mapArith a1 ds qs) (mapArith a2 ds qs) op
-  | ArithmeticNeg(a) -> negateArith (mapArith a ds qs)
+                          | _ -> Map.find x ds
+  | ROp(a1, op, a2) -> powerset (mapArith a1 ds) (mapArith a2 ds) op
+  | ArithmeticNeg(a) -> negateArith (mapArith a ds)
 
 let bot: Sign Set = Set.empty
 
@@ -114,52 +111,52 @@ let propegateFail (dict: DetectionOfSigns AnalysisMapping): DetectionOfSigns Ana
   for entry in newDict do
     newDict <- newDict.Add(entry.Key, bot)
   newDict
-    
 
-let mapping (edge: Edge) (ds: DetectionOfSigns AnalysisAssignment): DetectionOfSigns AnalysisMapping =
-  let (qs, action, qe) = edge
-  let old = ds.Item qs
+let analysisfunction (edge: Edge) (ds: DetectionOfSigns AnalysisMapping): DetectionOfSigns AnalysisMapping =
+  let (_, action, _) = edge
+
+  // Maintain the 0th node as the current source of truth
   match action with
-  | ActionDeclarationR(x) -> old.Add(x + ".fst", Set.singleton Zero).Add(x + ".snd", Set.singleton Zero) 
+  | ActionDeclarationR(x) -> ds.Add(x + ".fst", Set.singleton Zero).Add(x + ".snd", Set.singleton Zero) 
   | ActionDeclarationX(x)
-  | ActionDeclarationA(x, _) -> old.Add(x, Set.singleton Zero)
+  | ActionDeclarationA(x, _) -> ds.Add(x, Set.singleton Zero)
   | ActionAssignmentL(l, a) -> 
     match l with
-    | LabelX(x) ->  match (mapArith a ds qs) with
-                    | signs when signs <> Set.empty && not (failedbefore()) -> old.Add(x, signs)
-                    | _ -> propegateFail old
-    | LabelA(x, a') -> match ((mapArith a' ds qs), (mapArith a ds qs)) with  
-                        |(aIndex, signs) when aIndex |> Set.intersect (Set.ofList [Zero; Positive]) <> Set.empty && signs <> Set.empty && not (failedbefore()) -> old.Add(x, signs)
-                        | _ ->  propegateFail old
-    | LabelFstR(x) -> match (mapArith a ds qs) with
-                      | signs when signs <> Set.empty && not (failedbefore()) -> old.Add(x + ".fst", signs)
-                      | _ -> propegateFail old
-    | LabelSndR(x) -> match (mapArith a ds qs) with
-                      | signs when signs <> Set.empty && not (failedbefore()) -> old.Add(x + ".snd", signs)
-                      | _ -> propegateFail old
-  | ActionAssignmentR(x, a1, a2) -> match ((mapArith a1 ds qs), (mapArith a2 ds qs)) with
-                                    | (signs1, signs2) when signs1 <> Set.empty && signs2 <> Set.empty && not (failedbefore()) -> old.Add(x + ".fst", signs1).Add(x + ".snd", signs2)
-                                    | _ -> propegateFail old
+    | LabelX(x) ->  match (mapArith a ds) with
+                    | signs when signs <> Set.empty && not (failedbefore()) -> ds.Add(x, signs)
+                    | _ -> propegateFail ds
+    | LabelA(x, a') -> match ((mapArith a' ds), (mapArith a ds)) with  
+                        |(aIndex, signs) when aIndex |> Set.intersect (Set.ofList [Zero; Positive]) <> Set.empty && signs <> Set.empty && not (failedbefore()) -> ds.Add(x, signs)
+                        | _ ->  propegateFail ds
+    | LabelFstR(x) -> match (mapArith a ds) with
+                      | signs when signs <> Set.empty && not (failedbefore()) -> ds.Add(x + ".fst", signs)
+                      | _ -> propegateFail ds
+    | LabelSndR(x) -> match (mapArith a ds) with
+                      | signs when signs <> Set.empty && not (failedbefore()) -> ds.Add(x + ".snd", signs)
+                      | _ -> propegateFail ds
+  | ActionAssignmentR(x, a1, a2) -> match ((mapArith a1 ds), (mapArith a2 ds)) with
+                                    | (signs1, signs2) when signs1 <> Set.empty && signs2 <> Set.empty && not (failedbefore()) -> ds.Add(x + ".fst", signs1).Add(x + ".snd", signs2)
+                                    | _ -> propegateFail ds
   | ActionRead(l) -> 
     match l with
-    | LabelA(x, a) -> match (mapArith a ds qs) with
-                      | signs when signs |> Set.intersect (Set.ofList [Zero; Positive]) = Set.empty && not (failedbefore()) -> old.Add(x, signs)
-                      | _ -> propegateFail old
+    | LabelA(x, a) -> match (mapArith a ds) with
+                      | signs when signs |> Set.intersect (Set.ofList [Zero; Positive]) = Set.empty && not (failedbefore()) -> ds.Add(x, signs)
+                      | _ -> propegateFail ds
     | LabelX(x) -> if not (failedbefore()) then
-                    old.Add(x, Set.ofList [Negative; Zero; Positive])
+                    ds.Add(x, Set.ofList [Negative; Zero; Positive])
                    else 
-                    propegateFail old
+                    propegateFail ds
     | LabelFstR(x) -> if not (failedbefore()) then
-                        old.Add(x + ".fst", Set.ofList [Negative; Zero; Positive])
+                        ds.Add(x + ".fst", Set.ofList [Negative; Zero; Positive])
                       else 
-                        propegateFail old
+                        propegateFail ds
     | LabelSndR(x) -> if not (failedbefore()) then
-                        old.Add(x + ".snd", Set.ofList [Negative; Zero; Positive])
+                        ds.Add(x + ".snd", Set.ofList [Negative; Zero; Positive])
                       else 
-                        propegateFail old
-  | _ -> old
+                        propegateFail ds
+  | _ -> ds
 
-let relation (t1: DetectionOfSigns AnalysisMapping) (t2: DetectionOfSigns AnalysisMapping) : bool =
+let ordering (t1: DetectionOfSigns AnalysisMapping) (t2: DetectionOfSigns AnalysisMapping) : bool =
   Map.forall (fun key value -> Set.isSubset value (t2.Item key) ) t1
 
 let join (t1: DetectionOfSigns AnalysisMapping) (t2: DetectionOfSigns AnalysisMapping) : DetectionOfSigns AnalysisMapping =
@@ -172,7 +169,7 @@ let bottom (xs: string Set) : DetectionOfSigns AnalysisMapping =
 let analyse (pg: ProgramGraph) = 
   let domain : DetectionOfSigns AnalysisDomain = 
     {
-      relation = relation
+      ordering = ordering
       join = join
       bottom = bottom (ProgramGraph.variables pg)
     }
@@ -180,7 +177,7 @@ let analyse (pg: ProgramGraph) =
   let spec : DetectionOfSigns AnalysisSpecification = 
     {
       domain = domain
-      mapping = mapping
+      analysisfunction = analysisfunction
       initial = initial (ProgramGraph.variables pg)
     }
 
