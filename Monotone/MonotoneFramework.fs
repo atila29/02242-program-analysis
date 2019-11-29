@@ -1,4 +1,4 @@
-﻿module MonotoneFramework
+module MonotoneFramework
 
 open ProgramGraph
 open Worklist.Interface

@@ -1,4 +1,4 @@
-﻿open ParsingUtil
+open ParsingUtil
 open ProgramGraph
 open Analyses
 open Worklist.Implementation
