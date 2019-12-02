@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.2</TargetFramework>
@@ -26,6 +26,7 @@
     <Compile Include="Monotone/MonotoneFramework.fs" />
     <Compile Include="Analysis/ReachingDefinitions.fs" />
     <Compile Include="Analysis/DetectionOfSigns.fs" />
+    <Compile Include="TestUtil.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
    

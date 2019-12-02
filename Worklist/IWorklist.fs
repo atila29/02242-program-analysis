@@ -1,4 +1,4 @@
-﻿module Worklist.Interface
+module Worklist.Interface
 
 type IWorklist<'T> = 
   abstract member Empty : IWorklist<'T>

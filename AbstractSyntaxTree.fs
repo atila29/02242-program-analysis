@@ -1,4 +1,4 @@
-﻿module AbstractSyntaxTree
+module AbstractSyntaxTree
 
 type Program = Declaration * Statement
 

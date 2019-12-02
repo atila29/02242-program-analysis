@@ -18,6 +18,9 @@ let parseString (text:string) =
 
 // Parse a file. (A statement is parsed) 
 let parseFromFile filename =
-  if File.Exists(filename)    
-  then parseString(File.ReadAllText(filename))
+  // Fix annoying VS pathing
+  let abspath = Path.Combine(__SOURCE_DIRECTORY__, filename)
+
+  if File.Exists(abspath)
+  then parseString(File.ReadAllText(abspath))
   else invalidArg "ParserUtil" "File not found"

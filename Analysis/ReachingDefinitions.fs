@@ -12,9 +12,9 @@ type ReachingDefinition = Node option * Node
 let killset (action: Action): ReachingDefinition Set option =
   match action with
   | ActionDeclarationX(_)
-  | ActionDeclarationA(_, _)
+  | ActionDeclarationA(_)
   | ActionDeclarationR(_)
-  | ActionAssignmentR(_, _, _) -> Some Set.empty
+  | ActionAssignmentR(_) -> Some Set.empty
   | ActionAssignmentL(l, _) -> 
     match l with
     | LabelX(_) 
@@ -35,17 +35,17 @@ let genset (edge: Edge) : ReachingDefinition Set =
   | ActionAssignmentL(l, _) -> 
     match l with
     | LabelX(_)
-    | LabelA(_, _)
+    | LabelA(_)
     | LabelFstR(_)
     | LabelSndR(_) -> Set.singleton (ReachingDefinition(Some(qs), qe))
   | ActionDeclarationX(_)
-  | ActionDeclarationA(_, _)
+  | ActionDeclarationA(_)
   | ActionDeclarationR(_)
-  | ActionAssignmentR(_, _, _) -> Set.singleton (ReachingDefinition(Some(qs), qe))
+  | ActionAssignmentR(_) -> Set.singleton (ReachingDefinition(Some(qs), qe))
   | ActionRead(l) -> 
     match l with
     | LabelX(_)
-    | LabelA(_, _) -> Set.singleton (ReachingDefinition(Some(qs), qe))
+    | LabelA(_) -> Set.singleton (ReachingDefinition(Some(qs), qe))
     | _ -> Set.empty
   | _ -> Set.empty
 
@@ -56,20 +56,19 @@ let updateMapping (rdmapping: ReachingDefinition AnalysisMapping) (kills: Reachi
   | None -> let updatedMapping = rdmapping.Item x + gens
             rdmapping.Add(x, updatedMapping)
 
-let killGenSetResult (edge: Edge) (rd: ReachingDefinition AnalysisAssignment): ReachingDefinition AnalysisMapping = 
-  let (qs, action, _) = edge
-  let oldNodeMapping = rd.Item qs
+let killGenSetResult (edge: Edge) (rd: ReachingDefinition AnalysisMapping): ReachingDefinition AnalysisMapping = 
+  let (_, action, _) = edge
   let kills = killset action
   let gens = genset edge
 
   let var = ProgramGraph.variableInAction action
   match var with
-  | Some xs -> Set.foldBack (fun x acc -> updateMapping acc kills gens x) xs oldNodeMapping
-  | None -> oldNodeMapping
+  | Some xs -> Set.foldBack (fun x acc -> updateMapping acc kills gens x) xs rd
+  | None -> rd
 
 // These probably need to be made into some sort of common module, because
 // they will be used in more implementations
-let relation (t1: ReachingDefinition AnalysisMapping) (t2: ReachingDefinition AnalysisMapping) : bool =
+let ordering (t1: ReachingDefinition AnalysisMapping) (t2: ReachingDefinition AnalysisMapping) : bool =
   Map.forall (fun key value -> Set.isSubset value (t2.Item key) ) t1
 
 let join (t1: ReachingDefinition AnalysisMapping) (t2: ReachingDefinition AnalysisMapping) : ReachingDefinition AnalysisMapping =
@@ -87,7 +86,7 @@ let analyse (pg: ProgramGraph) (worklist: Node IWorklist) =
   let (qs, _, _) = pg
   let domain : ReachingDefinition AnalysisDomain = 
     {
-      relation = relation
+      ordering = ordering
       join = join
       bottom = bottom (ProgramGraph.variables pg)
     }
@@ -95,7 +94,7 @@ let analyse (pg: ProgramGraph) (worklist: Node IWorklist) =
   let spec : ReachingDefinition AnalysisSpecification = 
     {
       domain = domain
-      mapping = killGenSetResult
+      analysisfunction = killGenSetResult
       initial = initial (ProgramGraph.variables pg) qs
     }
 

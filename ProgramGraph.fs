@@ -105,11 +105,13 @@ let convertToProgramGraph (p: Program) =
                             | (lst2, cnt2) -> (lst @ lst2, cnt2)
         | _ -> ([], qs)
 
-    let fixIfElse (list: Edge List) (oldend: int) (newend: int) = 
+    let fixLastElement (list: Edge List) (oldend: int) (newend: int) = 
         list |> List.map (fun e -> 
         match e with
             | (qs, l, qe) when qe = oldend -> Edge(qs, l, newend)
             | (qs, l, qe) -> Edge(qs, l, qe))
+
+    
 
     let rec convertStatements ((qs, s): (int * Statement)) =
         match s with
@@ -119,9 +121,9 @@ let convertToProgramGraph (p: Program) =
                                 | (edges, n) -> (edges@ [Edge(qs, ActionBool(Not(b)), n); Edge(qs, ActionBool(b), qs + 1)], n)
         | IfElseStatement(b, s1, s2) -> match convertStatements (qs+1, s1) with
                                         | (edges1, n1) -> match convertStatements (n1, s2) with
-                                                            | (edges2, n2) -> (fixIfElse edges1 n1 n2 @ edges2 @ [Edge(qs, ActionBool(b), qs+1); Edge(qs, ActionBool(Not(b)), n1)], n2)
+                                                            | (edges2, n2) -> (fixLastElement edges1 n1 n2 @ edges2 @ [Edge(qs, ActionBool(b), qs+1); Edge(qs, ActionBool(Not(b)), n1)], n2)
         | WhileStatement (b, s) -> match convertStatements (qs+1, s) with
-                                    | (edges, n) -> (edges @ [Edge(qs, ActionBool(Not(b)), n); Edge(qs, ActionBool(b), qs + 1)], n)
+                                    | (edges, n) -> (fixLastElement edges n qs @ [Edge(qs, ActionBool(Not(b)), n); Edge(qs, ActionBool(b), qs + 1)], n)
         | Read(l) -> ([Edge(qs, ActionRead(l), qs+1)], qs + 1)
         | Write(a) -> ([Edge(qs, ActionWrite(a), qs+1)], qs + 1)
         | Statements (s1, s2) -> 
