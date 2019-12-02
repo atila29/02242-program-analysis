@@ -16,19 +16,20 @@ let main _ =
     "examples/ifelse.mc" ; 
     "examples/loop.mc"; 
     "examples/nested.mc"; 
-    "examples/nestedloops.mc"]
+    "examples/nestedloops.mc";
+    "examples/big.mc"]
 
-  // printfn "RD WITH FIFO"
-  // examples |> Seq.iter (run ReachingDefinitions.analyse (new Base.WorklistQueue<Node>()))
-  // printfn "RD WITH LIFO"
-  // examples |> Seq.iter (run ReachingDefinitions.analyse (new Base.WorklistStack<Node>()))
+  printfn "RD WITH FIFO"
+  examples |> Seq.iter (run ReachingDefinitions.analyse (new Base.WorklistQueue<Node>()))
+  printfn "RD WITH LIFO"
+  examples |> Seq.iter (run ReachingDefinitions.analyse (new Base.WorklistStack<Node>()))
   printfn "RD WITH RPO"
   examples |> Seq.iter (runReversePostOrder ReachingDefinitions.analyse )
 
-  // printfn "DS WITH FIFO"
-  // examples |> Seq.iter (run DetectionOfSigns.analyse (new Base.WorklistQueue<Node>()))
-  // printfn "DS WITH LIFO"
-  // examples |> Seq.iter (run DetectionOfSigns.analyse (new Base.WorklistStack<Node>()))
+  printfn "DS WITH FIFO"
+  examples |> Seq.iter (run DetectionOfSigns.analyse (new Base.WorklistQueue<Node>()))
+  printfn "DS WITH LIFO"
+  examples |> Seq.iter (run DetectionOfSigns.analyse (new Base.WorklistStack<Node>()))
 
   printfn "DS WITH RPO"
   examples |> Seq.iter (runReversePostOrder DetectionOfSigns.analyse )
