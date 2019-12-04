@@ -15,8 +15,7 @@ type WorklistQueue<'T>() =
     member this.IsEmpty = this.queue.Count <= 0
 
     member this.Insert e =
-      if(not (this.queue.Contains e)) then
-        this.queue.Enqueue e
+      this.queue.Enqueue e
       this :> IWorklist<'T>
 
     member this.Extract = 
@@ -37,8 +36,7 @@ type WorklistStack<'T> () =
     member this.IsEmpty = this.stack.Count <= 0
 
     member this.Insert e =
-      if (not (this.stack.Contains e)) then
-        this.stack.Push e 
+      this.stack.Push e 
       this :> IWorklist<'T>
 
     member this.Extract = 
